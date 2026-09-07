@@ -60,15 +60,7 @@
         .forsch-grid { grid-template-columns: repeat(8, 1fr); }
         .verk-grid { grid-template-columns: repeat(8, 1fr); }
         .spez-grid { grid-template-columns: repeat(8, 1fr); }
-        
-        /* Neu: Spaltenweise Sortierung (von oben nach unten) für Produkte */
-        .items-grid { 
-            display: grid;
-            grid-template-rows: repeat(16, auto); 
-            grid-auto-flow: column;               
-            grid-auto-columns: 1fr;               
-            padding: 5px 0; 
-        }
+        .items-grid { grid-template-columns: repeat(6, 1fr); padding: 5px 0; }
 
         .cell {
             padding: 6px 4px;
@@ -241,7 +233,6 @@
             { name: "Steine", geb: "Steinbruch", ek: "", vk: "", zutaten: [{n:"Werkzeuge", a:0.5}, {n:"Wasser", a:0.5}], sp: ["Königliches Arsenal"] },
             { name: "Stühle", geb: "Schreinerei", ek: "Handwerksmeister", vk: "Handwerkermarkt", zutaten: [{n:"Holz", a:3}, {n:"Werkzeuge", a:1}, {n:"Eisen", a:0.1}], sp: ["Kerker"] },
             { name: "Süßes Brot", geb: "Mühlenbäckerei", ek: "Müllermeister", vk: "Gasthaus", zutaten: [{n:"Mehl", a:3}, {n:"Milch", a:2}, {n:"Honig", a:1}, {n:"Sirup", a:1}, {n:"Trauben", a:1}], sp: ["Kerker"] },
-            { name: "Tafeln", geb: "Schreinerei", ek: "Handwerksmeister", vk: "Handwerkermarkt", zutaten: [{n:"Holz", a:2}, {n:"Werkzeuge", a:1}], sp: [] },
             { name: "Teppiche", geb: "Weberei", ek: "Schneidermeister", vk: "Tuchhändler", zutaten: [{n:"Holz", a:10}, {n:"Eisen", a:0.1}], sp: ["Kathedrale", "Gemeindehaus"] },
             { name: "Tische", geb: "Schreinerei", ek: "Handwerksmeister", vk: "Handwerkermarkt", zutaten: [{n:"Holz", a:3}, {n:"Werkzeuge", a:1}], sp: ["Spital", "Universität", "Gemeindehaus"] },
             { name: "Tran", geb: "Fischerei", ek: "Zuchtmeister", vk: "", zutaten: [{n:"Fische", a:1}, {n:"Wasser", a:1}], sp: ["Spital"] },
@@ -269,7 +260,26 @@
         function buildGrid(containerId, list, type) {
             const container = document.getElementById(containerId);
             if (!container) return;
-            list.forEach(name => {
+            
+            let sortedList = list;
+
+            // Für Produkte: Umsortierung von A-Z in Spaltenform (6 Spalten)
+            if (type === 'item') {
+                const total = list.length;
+                const cols = 6;
+                const rows = Math.ceil(total / cols); // 16 Zeilen
+                sortedList = [];
+                for (let r = 0; r < rows; r++) {
+                    for (let c = 0; c < cols; c++) {
+                        const index = c * rows + r;
+                        if (index < total) {
+                            sortedList.push(list[index]);
+                        }
+                    }
+                }
+            }
+
+            sortedList.forEach(name => {
                 const div = document.createElement('div');
                 div.className = 'cell';
                 div.textContent = name;
@@ -362,9 +372,16 @@
                   }).join('') 
                 : '<li><i>Wird für kein weiteres Produkt direkt benötigt</i></li>';
 
+            const spText = item.sp.length > 0 ? item.sp.join(', ') : 'Keine';
+
             box.innerHTML = `
                 <h3>Rezeptur für 1x ${item.name}</h3>
-                <p style="margin: 3px 0 8px 0; font-size:12px;"><b>Herstellung:</b> ${item.geb || 'Keine'} | <b>Forschung:</b> ${item.ek || 'Keine'}</p>
+                <p style="margin: 3px 0 8px 0; font-size:12px; line-height: 1.5;">
+                    <b>Herstellung:</b> ${item.geb || 'Keine'} | 
+                    <b>Forschung:</b> ${item.ek || 'Keine'} | 
+                    <b>Verkauf:</b> ${item.vk || 'Keine'}<br>
+                    <b>Spezialgebäude / Lieferorte:</b> ${spText}
+                </p>
                 <b>Benötigte Zutaten (Vorprodukte):</b>
                 <ul class="bom-list" style="color: var(--color-red);">${zutatenHtml}</ul>
                 <br>
