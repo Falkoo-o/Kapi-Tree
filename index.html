@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tech Tree - Kapi Regnum Produkte</title>
+    <title>Tech Tree & BOM - Kapi Regnum</title>
     <style>
         :root {
             --bg-main: #fbf9d8;
@@ -87,6 +87,30 @@
             border: 1px dashed #000;
         }
 
+        /* BOM Box Styling */
+        .bom-box {
+            margin-top: 8px;
+            background-color: #fffdf0;
+            border: 1px solid var(--border-color);
+            padding: 10px;
+            min-height: 40px;
+        }
+
+        .bom-box h3 {
+            margin: 0 0 6px 0;
+            font-size: 14px;
+            color: #4a4218;
+        }
+
+        .bom-list {
+            margin: 0;
+            padding-left: 18px;
+        }
+
+        .bom-list li {
+            margin-bottom: 3px;
+        }
+
         .legend {
             margin-top: 15px;
             font-size: 12px;
@@ -117,107 +141,112 @@
     <div class="section-title header-bar">Produkte</div>
     <div class="grid-container items-grid" id="container-items"></div>
 
+    <div class="section-title header-bar">Stückliste (BOM)</div>
+    <div class="bom-box" id="bom-box">
+        <i>Klicke auf ein Produkt, um dessen Stückliste und Rezeptur anzuzeigen.</i>
+    </div>
+
     <div class="legend">
         <span class="green">Grün</span> leuchten die jeweiligen Gebäude auf, in denen man das angemerkte Produkt produzieren, erforschen, verkaufen oder an die man es liefern kann (bzw. bei Tippen auf ein Gebäude alle zugehörigen Produkte).<br>
-        <span class="red">Rot</span> leuchten die Produkte auf, die man benötigt, um das angetippte Produkt herzustellen.<br>
-        <span class="blue">Blau</span> leuchten die Produkte auf, die man aus dem angetippten Produkt erstellen kann.
+        <span class="red">Rot</span> leuchten die Produkte auf, die man benötigt, um das angetippte Produkt herzustellen (inkl. benötigter Menge).<br>
+        <span class="blue">Blau</span> leuchten die Produkte auf, die man aus dem angetippten Produkt erstellen kann (inkl. Verbrauchsmenge im Folgeprodukt).
     </div>
 
     <script>
         const database = [
-            { name: "Äpfel", geb: "Obstpflückerei", ek: "Klosterabt", vk: "Obstmarkt", zutaten: ["Wasser"], sp: ["Stadtwache", "Universität", "Armenhaus", "Kerker", "Höfischer Gemüsegarten"] },
-            { name: "Arkebusen", geb: "Waffenschmiede", ek: "Schmiedemeister", vk: "Waffenhändler", zutaten: ["Eisen", "Salpeter", "Holz"], sp: ["Stadtwache", "Königliches Arsenal"] },
-            { name: "Bänke", geb: "Schreinerei", ek: "Handwerksmeister", vk: "", zutaten: ["Holz", "Werkzeuge", "Eisen", "Leder"], sp: ["Kathedrale", "Universität", "Kerker", "Höfischer Gemüsegarten"] },
-            { name: "Beeren", geb: "Obstpflückerei", ek: "Klosterabt", vk: "Obstmarkt", zutaten: ["Wasser"], sp: ["Spital", "Stadtwache", "Universität", "Höfischer Gemüsegarten"] },
-            { name: "Bibeln", geb: "Druckerei", ek: "Druckermeister", vk: "", zutaten: ["Holz", "Wasser", "Werkzeuge", "Gold", "Leder"], sp: ["Kathedrale"] },
-            { name: "Bienenwachs", geb: "Bauernhof", ek: "Klosterabt", vk: "", zutaten: ["Kräuter"], sp: [] },
-            { name: "Bier", geb: "Brauerei", ek: "Klosterabt", vk: "Gasthaus", zutaten: ["Wasser", "Getreide", "Fässer"], sp: ["Stadtwache", "Armenhaus"] },
-            { name: "Birnen", geb: "Obstpflückerei", ek: "Klosterabt", vk: "Obstmarkt", zutaten: ["Wasser"], sp: ["Gemeindehaus", "Höfischer Gemüsegarten"] },
-            { name: "Birnenschnaps", geb: "Brauerei", ek: "Müllermeister", vk: "Gasthaus", zutaten: ["Birnen", "Wasser", "Holz"], sp: [] },
-            { name: "Boote", geb: "Manufaktur", ek: "Handwerksmeister", vk: "", zutaten: ["Holz", "Pech", "Werkzeuge"], sp: ["Stadtwache", "Königliches Arsenal"] },
-            { name: "Brote", geb: "Bauernhof", ek: "Klosterabt", vk: "Bauernmarkt", zutaten: ["Wasser", "Getreide"], sp: ["Spital", "Armenhaus", "Kerker"] },
-            { name: "Bücher", geb: "Druckerei", ek: "Druckermeister", vk: "", zutaten: ["Holz", "Wasser", "Werkzeuge"], sp: ["Spital", "Universität", "Gemeindehaus"] },
-            { name: "Daunenbetten", geb: "Weberei", ek: "Schneidermeister", vk: "Tuchhändler", zutaten: ["Gänse", "Werkzeuge", "Tuch"], sp: [] },
-            { name: "Eier", geb: "Viehzucht", ek: "Zuchtmeister", vk: "Bauernmarkt", zutaten: ["Hühner", "Getreide", "Wasser"], sp: ["Kerker"] },
-            { name: "Eisen", geb: "Manufaktur", ek: "Handwerksmeister", vk: "", zutaten: ["Eisenerz", "Kohle"], sp: ["Königliches Arsenal"] },
-            { name: "Eisenerz", geb: "Steinbruch", ek: "Steinmetzmeister", vk: "", zutaten: ["Wasser"], sp: [] },
-            { name: "Fässer", geb: "Manufaktur", ek: "Handwerksmeister", vk: "Handwerkermarkt", zutaten: ["Holz", "Eisen", "Werkzeuge"], sp: ["Höfischer Gemüsegarten", "Königliches Arsenal"] },
-            { name: "Fische", geb: "Fischerei", ek: "Zuchtmeister", vk: "Viktualienmarkt", zutaten: ["Boote", "Netze"], sp: ["Armenhaus"] },
-            { name: "Flachs", geb: "Bauernhof", ek: "Klosterabt", vk: "", zutaten: ["Wasser"], sp: ["Höfischer Gemüsegarten", "Königliches Arsenal"] },
-            { name: "Fuhrwerke", geb: "Manufaktur", ek: "Handwerksmeister", vk: "", zutaten: ["Holz", "Eisen", "Werkzeuge"], sp: ["Stadtwache", "Gemeindehaus", "Höfischer Gemüsegarten", "Königliches Arsenal"] },
-            { name: "Gänse", geb: "Viehzucht", ek: "Zuchtmeister", vk: "Bauernmarkt", zutaten: ["Wasser", "Getreide"], sp: [] },
-            { name: "Gänsebraten", geb: "Schlachterei", ek: "Zuchtmeister", vk: "Viktualienmarkt", zutaten: ["Gänse", "Kräuter", "Äpfel"], sp: [] },
-            { name: "Getreide", geb: "Bauernhof", ek: "Klosterabt", vk: "Viktualienmarkt", zutaten: ["Wasser"], sp: ["Höfischer Gemüsegarten"] },
-            { name: "Gewänder", geb: "Weberei", ek: "Schneidermeister", vk: "Tuchhändler", zutaten: ["Wolle", "Seide"], sp: ["Kathedrale", "Gemeindehaus"] },
-            { name: "Gewürze", geb: "Karawanserei", ek: "Diplomaten", vk: "Viktualienmarkt", zutaten: ["Fuhrwerke", "Pferde", "Trockenfleisch", "Kräuter"], sp: ["Kathedrale", "Armenhaus"] },
-            { name: "Gold", geb: "Steinbruch", ek: "Steinmetzmeister", vk: "", zutaten: ["Werkzeuge", "Wasser"], sp: ["Kathedrale"] },
-            { name: "Goldgeschmeide", geb: "Goldschmiede", ek: "Schmiedemeister", vk: "Ablasshandel", zutaten: ["Gold", "Werkzeuge", "Perlen"], sp: ["Kathedrale", "Gemeindehaus"] },
-            { name: "Heiligenstatuen", geb: "Goldschmiede", ek: "Schmiedemeister", vk: "Ablasshandel", zutaten: ["Gold", "Silber", "Holz", "Werkzeuge"], sp: ["Kathedrale"] },
-            { name: "Hellebarden", geb: "Waffenschmiede", ek: "Schmiedemeister", vk: "Waffenhändler", zutaten: ["Eisen", "Werkzeuge", "Holz"], sp: ["Kerker", "Königliches Arsenal"] },
-            { name: "Holz", geb: "Holzfäller", ek: "", vk: "", zutaten: ["Wasser"], sp: [] },
-            { name: "Honig", geb: "Bauernhof", ek: "Klosterabt", vk: "Bauernmarkt", zutaten: ["Kräuter"], sp: ["Kathedrale", "Gemeindehaus", "Armenhaus"] },
-            { name: "Hühner", geb: "Viehzucht", ek: "Zuchtmeister", vk: "Bauernmarkt", zutaten: ["Wasser", "Getreide"], sp: ["Spital"] },
-            { name: "Käse", geb: "Bauernhof", ek: "Müllermeister", vk: "Bauernmarkt", zutaten: ["Milch", "Wasser", "Salz"], sp: ["Kerker"] },
-            { name: "Kandierte Äpfel", geb: "Mühlenbäckerei", ek: "Müllermeister", vk: "Viktualienmarkt", zutaten: ["Äpfel", "Sirup"], sp: ["Kerker"] },
-            { name: "Kerzen", geb: "Bauernhof", ek: "Klosterabt", vk: "Viktualienmarkt", zutaten: ["Bienenwachs", "Werkzeuge", "Flachs"], sp: [] },
-            { name: "Kirschen", geb: "Obstpflückerei", ek: "Klosterabt", vk: "Obstmarkt", zutaten: ["Wasser"], sp: ["Gemeindehaus", "Armenhaus", "Höfischer Gemüsegarten"] },
-            { name: "Kirschwasser", geb: "Brauerei", ek: "Müllermeister", vk: "Gasthaus", zutaten: ["Kirschen", "Wasser", "Holz"], sp: ["Kerker"] },
-            { name: "Kleidung", geb: "Weberei", ek: "Schneidermeister", vk: "Tuchhändler", zutaten: ["Wolle", "Flachs"], sp: ["Armenhaus"] },
-            { name: "Kohle", geb: "Holzfäller", ek: "Handwerksmeister", vk: "", zutaten: ["Holz"], sp: [] },
-            { name: "Kräuter", geb: "Bauernhof", ek: "Klosterabt", vk: "Bauernmarkt", zutaten: ["Wasser"], sp: ["Spital", "Kathedrale", "Gemeindehaus", "Höfischer Gemüsegarten"] },
-            { name: "Lampenöl", geb: "Fischerei", ek: "Zuchtmeister", vk: "Viktualienmarkt", zutaten: ["Tran", "Kohle"], sp: [] },
-            { name: "Lebkuchen", geb: "Mühlenbäckerei", ek: "Müllermeister", vk: "Gasthaus", zutaten: ["Mehl", "Gewürze", "Wasser", "Sirup", "Honig"], sp: ["Kerker"] },
-            { name: "Leder", geb: "Weberei", ek: "Schneidermeister", vk: "", zutaten: ["Ziegen", "Holz", "Werkzeuge"], sp: ["Stadtwache", "Kathedrale", "Gemeindehaus", "Königliches Arsenal"] },
-            { name: "Lederwams", geb: "Waffenschmiede", ek: "Schmiedemeister", vk: "Waffenhändler", zutaten: ["Leder", "Werkzeuge", "Tuch", "Wasser"], sp: ["Kerker", "Königliches Arsenal"] },
-            { name: "Mehl", geb: "Mühlenbäckerei", ek: "Müllermeister", vk: "", zutaten: ["Getreide", "Steine"], sp: [] },
-            { name: "Met", geb: "Brauerei", ek: "Klosterabt", vk: "Gasthaus", zutaten: ["Wasser", "Honig", "Fässer"], sp: ["Spital"] },
-            { name: "Milch", geb: "Viehzucht", ek: "Zuchtmeister", vk: "Bauernmarkt", zutaten: ["Wasser", "Ziegen", "Rüben"], sp: ["Armenhaus"] },
-            { name: "Muschelketten", geb: "Goldschmiede", ek: "Schmiedemeister", vk: "Ablasshandel", zutaten: ["Muscheln", "Gold", "Werkzeuge"], sp: [] },
-            { name: "Muscheln", geb: "Fischerei", ek: "Zuchtmeister", vk: "", zutaten: ["Boote", "Werkzeuge"], sp: [] },
-            { name: "Netze", geb: "Weberei", ek: "Schneidermeister", vk: "", zutaten: ["Flachs", "Werkzeuge"], sp: [] },
-            { name: "Nüsse", geb: "Obstpflückerei", ek: "Klosterabt", vk: "Obstmarkt", zutaten: ["Wasser"], sp: ["Spital", "Universität", "Höfischer Gemüsegarten"] },
-            { name: "Pamphlete", geb: "Druckerei", ek: "Druckermeister", vk: "", zutaten: ["Holz", "Wasser", "Werkzeuge"], sp: ["Kerker"] },
-            { name: "Pech", geb: "Holzfäller", ek: "Handwerksmeister", vk: "", zutaten: ["Wasser", "Holz"], sp: [] },
-            { name: "Pergamente", geb: "Druckerei", ek: "Druckermeister", vk: "", zutaten: ["Holz", "Wasser", "Werkzeuge"], sp: ["Universität", "Gemeindehaus"] },
-            { name: "Perlen", geb: "Fischerei", ek: "Zuchtmeister", vk: "", zutaten: ["Boote", "Werkzeuge"], sp: [] },
-            { name: "Perlenketten", geb: "Goldschmiede", ek: "Schmiedemeister", vk: "Ablasshandel", zutaten: ["Perlen", "Gold", "Werkzeuge"], sp: ["Kathedrale"] },
-            { name: "Pferde", geb: "Viehzucht", ek: "Zuchtmeister", vk: "", zutaten: ["Wasser", "Rüben"], sp: ["Stadtwache", "Kathedrale"] },
-            { name: "Pökelfleisch", geb: "Schlachterei", ek: "Zuchtmeister", vk: "Viktualienmarkt", zutaten: ["Schweine", "Salz", "Kräuter", "Gewürze"], sp: ["Spital", "Stadtwache", "Armenhaus"] },
-            { name: "Räucherfisch", geb: "Fischerei", ek: "Zuchtmeister", vk: "Bauernmarkt", zutaten: ["Fische", "Kohle", "Kräuter"], sp: [] },
-            { name: "Regale", geb: "Schreinerei", ek: "Handwerksmeister", vk: "Handwerkermarkt", zutaten: ["Holz", "Werkzeuge", "Eisen"], sp: ["Spital", "Universität", "Gemeindehaus", "Höfischer Gemüsegarten"] },
-            { name: "Rüben", geb: "Bauernhof", ek: "Klosterabt", vk: "", zutaten: ["Wasser"], sp: ["Höfischer Gemüsegarten"] },
-            { name: "Rüstungen", geb: "Waffenschmiede", ek: "Schmiedemeister", vk: "Waffenhändler", zutaten: ["Eisen", "Werkzeuge", "Gold"], sp: ["Stadtwache", "Königliches Arsenal"] },
-            { name: "Salpeter", geb: "Steinbruch", ek: "Steinmetzmeister", vk: "", zutaten: ["Werkzeuge", "Wasser", "Holz"], sp: ["Stadtwache"] },
-            { name: "Salz", geb: "Karawanserei", ek: "Diplomaten", vk: "Viktualienmarkt", zutaten: ["Fuhrwerke", "Pferde", "Brote", "Teppiche"], sp: ["Spital"] },
-            { name: "Schilde", geb: "Waffenschmiede", ek: "Schmiedemeister", vk: "Waffenhändler", zutaten: ["Holz", "Eisen", "Kohle", "Werkzeuge"], sp: ["Kerker", "Königliches Arsenal"] },
-            { name: "Schlachtrösser", geb: "Waffenschmiede", ek: "Schmiedemeister", vk: "Waffenhändler", zutaten: ["Pferde", "Eisen", "Leder"], sp: ["Königliches Arsenal"] },
-            { name: "Schnaps", geb: "Brauerei", ek: "Klosterabt", vk: "Gasthaus", zutaten: ["Wasser", "Kräuter", "Fässer"], sp: ["Spital", "Stadtwache", "Armenhaus"] },
-            { name: "Schränke", geb: "Schreinerei", ek: "Handwerksmeister", vk: "Handwerkermarkt", zutaten: ["Holz", "Werkzeuge", "Eisen"], sp: ["Gemeindehaus", "Armenhaus"] },
-            { name: "Schreibfedern", geb: "Druckerei", ek: "Handwerksmeister", vk: "Handwerkermarkt", zutaten: ["Gänse", "Werkzeuge"], sp: [] },
-            { name: "Schuhe", geb: "Weberei", ek: "Schneidermeister", vk: "Tuchhändler", zutaten: ["Leder", "Holz", "Werkzeuge"], sp: ["Armenhaus"] },
-            { name: "Schweine", geb: "Viehzucht", ek: "Zuchtmeister", vk: "Bauernmarkt", zutaten: ["Wasser", "Rüben"], sp: [] },
-            { name: "Schwerter", geb: "Waffenschmiede", ek: "Schmiedemeister", vk: "Waffenhändler", zutaten: ["Eisen", "Werkzeuge", "Silber"], sp: ["Stadtwache", "Kerker", "Königliches Arsenal"] },
-            { name: "Seide", geb: "Karawanserei", ek: "Diplomaten", vk: "Tuchhändler", zutaten: ["Fuhrwerke", "Pferde", "Trockenfleisch", "Honig"], sp: [] },
-            { name: "Silber", geb: "Steinbruch", ek: "Steinmetzmeister", vk: "", zutaten: ["Werkzeuge", "Wasser"], sp: ["Königliches Arsenal"] },
-            { name: "Silbergeschmeide", geb: "Goldschmiede", ek: "Schmiedemeister", vk: "Waffenhändler", zutaten: ["Silber", "Werkzeuge"], sp: ["Stadtwache"] },
-            { name: "Sirup", geb: "Mühlenbäckerei", ek: "Müllermeister", vk: "", zutaten: ["Rüben", "Wasser"], sp: [] },
-            { name: "Steine", geb: "Steinbruch", ek: "", vk: "", zutaten: ["Werkzeuge", "Wasser"], sp: ["Königliches Arsenal"] },
-            { name: "Stühle", geb: "Schreinerei", ek: "Handwerksmeister", vk: "Handwerkermarkt", zutaten: ["Holz", "Werkzeuge", "Eisen"], sp: ["Kerker"] },
-            { name: "Süßes Brot", geb: "Mühlenbäckerei", ek: "Müllermeister", vk: "Gasthaus", zutaten: ["Mehl", "Milch", "Honig", "Sirup", "Trauben"], sp: ["Kerker"] },
-            { name: "Teppiche", geb: "Weberei", ek: "Schneidermeister", vk: "Tuchhändler", zutaten: ["Wolle", "Werkzeuge"], sp: ["Kathedrale", "Gemeindehaus"] },
-            { name: "Tische", geb: "Schreinerei", ek: "Handwerksmeister", vk: "Handwerkermarkt", zutaten: ["Holz", "Werkzeuge", "Eisen"], sp: ["Spital", "Universität", "Gemeindehaus"] },
-            { name: "Tran", geb: "Fischerei", ek: "Zuchtmeister", vk: "", zutaten: ["Fische", "Wasser"], sp: ["Spital"] },
-            { name: "Trauben", geb: "Obstpflückerei", ek: "Klosterabt", vk: "Obstmarkt", zutaten: ["Wasser"], sp: ["Höfischer Gemüsegarten"] },
-            { name: "Trockenfleisch", geb: "Schlachterei", ek: "Zuchtmeister", vk: "Viktualienmarkt", zutaten: ["Schweine", "Kräuter"], sp: ["Spital", "Stadtwache", "Armenhaus"] },
-            { name: "Tuch", geb: "Weberei", ek: "Schneidermeister", vk: "Tuchhändler", zutaten: ["Wolle", "Werkzeuge"], sp: ["Spital"] },
+            { name: "Äpfel", geb: "Obstpflückerei", ek: "Klosterabt", vk: "Obstmarkt", zutaten: [{n:"Wasser", a:10}], sp: ["Stadtwache", "Universität", "Armenhaus", "Kerker", "Höfischer Gemüsegarten"] },
+            { name: "Arkebusen", geb: "Waffenschmiede", ek: "Schmiedemeister", vk: "Waffenhändler", zutaten: [{n:"Eisen", a:2}, {n:"Salpeter", a:2}, {n:"Holz", a:2}], sp: ["Stadtwache", "Königliches Arsenal"] },
+            { name: "Bänke", geb: "Schreinerei", ek: "Handwerksmeister", vk: "", zutaten: [{n:"Holz", a:4}, {n:"Werkzeuge", a:1}, {n:"Eisen", a:0.1}, {n:"Leder", a:2}], sp: ["Kathedrale", "Universität", "Kerker", "Höfischer Gemüsegarten"] },
+            { name: "Beeren", geb: "Obstpflückerei", ek: "Klosterabt", vk: "Obstmarkt", zutaten: [{n:"Wasser", a:10}], sp: ["Spital", "Stadtwache", "Universität", "Höfischer Gemüsegarten"] },
+            { name: "Bibeln", geb: "Druckerei", ek: "Druckermeister", vk: "", zutaten: [{n:"Holz", a:5}, {n:"Wasser", a:2}, {n:"Werkzeuge", a:0.1}, {n:"Gold", a:0.1}, {n:"Leder", a:1}], sp: ["Kathedrale"] },
+            { name: "Bienenwachs", geb: "Bauernhof", ek: "Klosterabt", vk: "", zutaten: [{n:"Kräuter", a:5}], sp: [] },
+            { name: "Bier", geb: "Brauerei", ek: "Klosterabt", vk: "Gasthaus", zutaten: [{n:"Wasser", a:2}, {n:"Getreide", a:1}, {n:"Fässer", a:0.1}], sp: ["Stadtwache", "Armenhaus"] },
+            { name: "Birnen", geb: "Obstpflückerei", ek: "Klosterabt", vk: "Obstmarkt", zutaten: [{n:"Wasser", a:10}], sp: ["Gemeindehaus", "Höfischer Gemüsegarten"] },
+            { name: "Birnenschnaps", geb: "Brauerei", ek: "Müllermeister", vk: "Gasthaus", zutaten: [{n:"Birnen", a:10}, {n:"Wasser", a:10}, {n:"Holz", a:2}], sp: [] },
+            { name: "Boote", geb: "Manufaktur", ek: "Handwerksmeister", vk: "", zutaten: [{n:"Holz", a:4}, {n:"Pech", a:1}, {n:"Werkzeuge", a:2}], sp: ["Stadtwache", "Königliches Arsenal"] },
+            { name: "Brote", geb: "Bauernhof", ek: "Klosterabt", vk: "Bauernmarkt", zutaten: [{n:"Wasser", a:1}, {n:"Getreide", a:2}], sp: ["Spital", "Armenhaus", "Kerker"] },
+            { name: "Bücher", geb: "Druckerei", ek: "Druckermeister", vk: "", zutaten: [{n:"Holz", a:4}, {n:"Wasser", a:2}, {n:"Werkzeuge", a:0.1}], sp: ["Spital", "Universität", "Gemeindehaus"] },
+            { name: "Daunenbetten", geb: "Weberei", ek: "Schneidermeister", vk: "Tuchhändler", zutaten: [{n:"Gänse", a:20}, {n:"Werkzeuge", a:2}, {n:"Tuch", a:1}], sp: [] },
+            { name: "Eier", geb: "Viehzucht", ek: "Zuchtmeister", vk: "Bauernmarkt", zutaten: [{n:"Hühner", a:0.1}, {n:"Getreide", a:0.1}, {n:"Wasser", a:1}], sp: ["Kerker"] },
+            { name: "Eisen", geb: "Manufaktur", ek: "Handwerksmeister", vk: "", zutaten: [{n:"Eisenerz", a:2}, {n:"Kohle", a:1}], sp: ["Königliches Arsenal"] },
+            { name: "Eisenerz", geb: "Steinbruch", ek: "Steinmetzmeister", vk: "", zutaten: [{n:"Wasser", a:10}], sp: [] },
+            { name: "Fässer", geb: "Manufaktur", ek: "Handwerksmeister", vk: "Handwerkermarkt", zutaten: [{n:"Holz", a:0.5}, {n:"Eisen", a:0.1}, {n:"Werkzeuge", a:0.2}], sp: ["Höfischer Gemüsegarten", "Königliches Arsenal"] },
+            { name: "Fische", geb: "Fischerei", ek: "Zuchtmeister", vk: "Viktualienmarkt", zutaten: [{n:"Boote", a:0.05}, {n:"Netze", a:0.1}], sp: ["Armenhaus"] },
+            { name: "Flachs", geb: "Bauernhof", ek: "Klosterabt", vk: "", zutaten: [{n:"Wasser", a:10}], sp: ["Höfischer Gemüsegarten", "Königliches Arsenal"] },
+            { name: "Fuhrwerke", geb: "Manufaktur", ek: "Handwerksmeister", vk: "", zutaten: [{n:"Holz", a:2}, {n:"Eisen", a:0.5}, {n:"Werkzeuge", a:1}], sp: ["Stadtwache", "Gemeindehaus", "Höfischer Gemüsegarten", "Königliches Arsenal"] },
+            { name: "Gänse", geb: "Viehzucht", ek: "Zuchtmeister", vk: "Bauernmarkt", zutaten: [{n:"Wasser", a:15}, {n:"Getreide", a:4}], sp: [] },
+            { name: "Gänsebraten", geb: "Schlachterei", ek: "Zuchtmeister", vk: "Viktualienmarkt", zutaten: [{n:"Gänse", a:1}, {n:"Kräuter", a:0.3}, {n:"Äpfel", a:3}], sp: [] },
+            { name: "Getreide", geb: "Bauernhof", ek: "Klosterabt", vk: "Viktualienmarkt", zutaten: [{n:"Wasser", a:2}], sp: ["Höfischer Gemüsegarten"] },
+            { name: "Gewänder", geb: "Weberei", ek: "Schneidermeister", vk: "Tuchhändler", zutaten: [{n:"Wolle", a:10}, {n:"Seide", a:0.1}], sp: ["Kathedrale", "Gemeindehaus"] },
+            { name: "Gewürze", geb: "Karawanserei", ek: "Diplomaten", vk: "Viktualienmarkt", zutaten: [{n:"Fuhrwerke", a:0.1}, {n:"Pferde", a:0.1}, {n:"Trockenfleisch", a:0.5}, {n:"Kräuter", a:2}], sp: ["Kathedrale", "Armenhaus"] },
+            { name: "Gold", geb: "Steinbruch", ek: "Steinmetzmeister", vk: "", zutaten: [{n:"Werkzeuge", a:10}, {n:"Wasser", a:50}], sp: ["Kathedrale"] },
+            { name: "Goldgeschmeide", geb: "Goldschmiede", ek: "Schmiedemeister", vk: "Ablasshandel", zutaten: [{n:"Gold", a:5}, {n:"Werkzeuge", a:5}], sp: ["Kathedrale", "Gemeindehaus"] },
+            { name: "Heiligenstatuen", geb: "Goldschmiede", ek: "Schmiedemeister", vk: "Ablasshandel", zutaten: [{n:"Gold", a:1}, {n:"Silber", a:1}, {n:"Holz", a:2}, {n:"Werkzeuge", a:5}], sp: ["Kathedrale"] },
+            { name: "Hellebarden", geb: "Waffenschmiede", ek: "Schmiedemeister", vk: "Waffenhändler", zutaten: [{n:"Eisen", a:2}, {n:"Werkzeuge", a:2}, {n:"Holz", a:4}], sp: ["Kerker", "Königliches Arsenal"] },
+            { name: "Holz", geb: "Holzfäller", ek: "", vk: "", zutaten: [{n:"Wasser", a:20}], sp: [] },
+            { name: "Honig", geb: "Bauernhof", ek: "Klosterabt", vk: "Bauernmarkt", zutaten: [{n:"Kräuter", a:5}], sp: ["Kathedrale", "Gemeindehaus", "Armenhaus"] },
+            { name: "Hühner", geb: "Viehzucht", ek: "Zuchtmeister", vk: "Bauernmarkt", zutaten: [{n:"Wasser", a:20}, {n:"Getreide", a:5}], sp: ["Spital"] },
+            { name: "Käse", geb: "Bauernhof", ek: "Müllermeister", vk: "Bauernmarkt", zutaten: [{n:"Milch", a:1}, {n:"Wasser", a:1}, {n:"Salz", a:0.05}], sp: ["Kerker"] },
+            { name: "Kandierte Äpfel", geb: "Mühlenbäckerei", ek: "Müllermeister", vk: "Viktualienmarkt", zutaten: [{n:"Äpfel", a:1}, {n:"Sirup", a:1}], sp: ["Kerker"] },
+            { name: "Kerzen", geb: "Bauernhof", ek: "Klosterabt", vk: "Viktualienmarkt", zutaten: [{n:"Bienenwachs", a:0.2}, {n:"Werkzeuge", a:0.1}, {n:"Flachs", a:0.1}], sp: [] },
+            { name: "Kirschen", geb: "Obstpflückerei", ek: "Klosterabt", vk: "Obstmarkt", zutaten: [{n:"Wasser", a:10}], sp: ["Gemeindehaus", "Armenhaus", "Höfischer Gemüsegarten"] },
+            { name: "Kirschwasser", geb: "Brauerei", ek: "Müllermeister", vk: "Gasthaus", zutaten: [{n:"Kirschen", a:10}, {n:"Wasser", a:10}, {n:"Holz", a:2}], sp: ["Kerker"] },
+            { name: "Kleidung", geb: "Weberei", ek: "Schneidermeister", vk: "Tuchhändler", zutaten: [{n:"Wolle", a:7}, {n:"Flachs", a:10}], sp: ["Armenhaus"] },
+            { name: "Kohle", geb: "Holzfäller", ek: "Handwerksmeister", vk: "", zutaten: [{n:"Holz", a:2}], sp: [] },
+            { name: "Kräuter", geb: "Bauernhof", ek: "Klosterabt", vk: "Bauernmarkt", zutaten: [{n:"Wasser", a:5}], sp: ["Spital", "Kathedrale", "Gemeindehaus", "Höfischer Gemüsegarten"] },
+            { name: "Lampenöl", geb: "Fischerei", ek: "Zuchtmeister", vk: "Viktualienmarkt", zutaten: [{n:"Tran", a:0.1}, {n:"Kohle", a:0.1}], sp: [] },
+            { name: "Lebkuchen", geb: "Mühlenbäckerei", ek: "Müllermeister", vk: "Gasthaus", zutaten: [{n:"Mehl", a:2}, {n:"Gewürze", a:0.1}, {n:"Wasser", a:10}, {n:"Sirup", a:1}, {n:"Honig", a:0.1}], sp: ["Kerker"] },
+            { name: "Leder", geb: "Weberei", ek: "Schneidermeister", vk: "", zutaten: [{n:"Ziegen", a:1}, {n:"Holz", a:2}, {n:"Werkzeuge", a:0.2}], sp: ["Stadtwache", "Kathedrale", "Gemeindehaus", "Königliches Arsenal"] },
+            { name: "Lederwams", geb: "Waffenschmiede", ek: "Schmiedemeister", vk: "Waffenhändler", zutaten: [{n:"Leder", a:2}, {n:"Werkzeuge", a:2}, {n:"Tuch", a:1}, {n:"Wasser", a:10}], sp: ["Kerker", "Königliches Arsenal"] },
+            { name: "Mehl", geb: "Mühlenbäckerei", ek: "Müllermeister", vk: "", zutaten: [{n:"Getreide", a:1}, {n:"Steine", a:0.05}], sp: [] },
+            { name: "Met", geb: "Brauerei", ek: "Klosterabt", vk: "Gasthaus", zutaten: [{n:"Wasser", a:2}, {n:"Honig", a:2}, {n:"Fässer", a:0.1}], sp: ["Spital"] },
+            { name: "Milch", geb: "Viehzucht", ek: "Zuchtmeister", vk: "Bauernmarkt", zutaten: [{n:"Wasser", a:0.1}, {n:"Ziegen", a:0.1}, {n:"Rüben", a:0.1}], sp: ["Armenhaus"] },
+            { name: "Muschelketten", geb: "Goldschmiede", ek: "Schmiedemeister", vk: "Ablasshandel", zutaten: [{n:"Muscheln", a:10}, {n:"Gold", a:0.1}, {n:"Werkzeuge", a:1}], sp: [] },
+            { name: "Muscheln", geb: "Fischerei", ek: "Zuchtmeister", vk: "", zutaten: [{n:"Boote", a:0.1}, {n:"Werkzeuge", a:0.1}], sp: [] },
+            { name: "Netze", geb: "Weberei", ek: "Schneidermeister", vk: "", zutaten: [{n:"Flachs", a:5}, {n:"Werkzeuge", a:0.1}], sp: [] },
+            { name: "Nüsse", geb: "Obstpflückerei", ek: "Klosterabt", vk: "Obstmarkt", zutaten: [{n:"Wasser", a:10}], sp: ["Spital", "Universität", "Höfischer Gemüsegarten"] },
+            { name: "Pamphlete", geb: "Druckerei", ek: "Druckermeister", vk: "", zutaten: [{n:"Holz", a:2}, {n:"Wasser", a:1}, {n:"Werkzeuge", a:0.1}], sp: ["Kerker"] },
+            { name: "Pech", geb: "Holzfäller", ek: "Handwerksmeister", vk: "", zutaten: [{n:"Wasser", a:2}, {n:"Holz", a:5}], sp: [] },
+            { name: "Pergamente", geb: "Druckerei", ek: "Druckermeister", vk: "", zutaten: [{n:"Holz", a:1}, {n:"Wasser", a:0.5}, {n:"Werkzeuge", a:0.1}], sp: ["Universität", "Gemeindehaus"] },
+            { name: "Perlen", geb: "Fischerei", ek: "Zuchtmeister", vk: "", zutaten: [{n:"Boote", a:0.1}, {n:"Werkzeuge", a:0.2}], sp: [] },
+            { name: "Perlenketten", geb: "Goldschmiede", ek: "Schmiedemeister", vk: "Ablasshandel", zutaten: [{n:"Perlen", a:20}, {n:"Gold", a:0.1}, {n:"Werkzeuge", a:1}], sp: ["Kathedrale"] },
+            { name: "Pferde", geb: "Viehzucht", ek: "Zuchtmeister", vk: "", zutaten: [{n:"Wasser", a:200}, {n:"Rüben", a:300}], sp: ["Stadtwache", "Kathedrale"] },
+            { name: "Pökelfleisch", geb: "Schlachterei", ek: "Zuchtmeister", vk: "Viktualienmarkt", zutaten: [{n:"Schweine", a:0.2}, {n:"Salz", a:0.5}, {n:"Kräuter", a:0.5}, {n:"Gewürze", a:0.1}], sp: ["Spital", "Stadtwache", "Armenhaus"] },
+            { name: "Räucherfisch", geb: "Fischerei", ek: "Zuchtmeister", vk: "Bauernmarkt", zutaten: [{n:"Fische", a:1}, {n:"Kohle", a:0.5}, {n:"Kräuter", a:0.3}], sp: [] },
+            { name: "Regale", geb: "Schreinerei", ek: "Handwerksmeister", vk: "Handwerkermarkt", zutaten: [{n:"Holz", a:3}, {n:"Werkzeuge", a:1}, {n:"Eisen", a:0.1}], sp: ["Spital", "Universität", "Gemeindehaus", "Höfischer Gemüsegarten"] },
+            { name: "Rüben", geb: "Bauernhof", ek: "Klosterabt", vk: "", zutaten: [{n:"Wasser", a:2}, {n:"Brote", a:2}], sp: ["Höfischer Gemüsegarten"] },
+            { name: "Rüstungen", geb: "Waffenschmiede", ek: "Schmiedemeister", vk: "Waffenhändler", zutaten: [{n:"Eisen", a:5}, {n:"Werkzeuge", a:5}, {n:"Gold", a:1}], sp: ["Stadtwache", "Königliches Arsenal"] },
+            { name: "Salpeter", geb: "Steinbruch", ek: "Steinmetzmeister", vk: "", zutaten: [{n:"Werkzeuge", a:5}, {n:"Wasser", a:5}, {n:"Holz", a:5}], sp: ["Stadtwache"] },
+            { name: "Salz", geb: "Karawanserei", ek: "Diplomaten", vk: "Viktualienmarkt", zutaten: [{n:"Fuhrwerke", a:0.1}, {n:"Pferde", a:0.1}, {n:"Brote", a:5}, {n:"Teppiche", a:0.5}], sp: ["Spital"] },
+            { name: "Schilde", geb: "Waffenschmiede", ek: "Schmiedemeister", vk: "Waffenhändler", zutaten: [{n:"Holz", a:3}, {n:"Eisen", a:1}, {n:"Kohle", a:1}, {n:"Werkzeuge", a:2}], sp: ["Kerker", "Königliches Arsenal"] },
+            { name: "Schlachtrösser", geb: "Waffenschmiede", ek: "Schmiedemeister", vk: "Waffenhändler", zutaten: [{n:"Pferde", a:1}, {n:"Eisen", a:5}, {n:"Leder", a:5}], sp: ["Königliches Arsenal"] },
+            { name: "Schnaps", geb: "Brauerei", ek: "Klosterabt", vk: "Gasthaus", zutaten: [{n:"Wasser", a:10}, {n:"Kräuter", a:5}, {n:"Fässer", a:0.1}], sp: ["Spital", "Stadtwache", "Armenhaus"] },
+            { name: "Schränke", geb: "Schreinerei", ek: "Handwerksmeister", vk: "Handwerkermarkt", zutaten: [{n:"Holz", a:10}, {n:"Werkzeuge", a:2}, {n:"Eisen", a:0.2}], sp: ["Gemeindehaus", "Armenhaus"] },
+            { name: "Schreibfedern", geb: "Druckerei", ek: "Handwerksmeister", vk: "Handwerkermarkt", zutaten: [{n:"Gänse", a:0.1}, {n:"Werkzeuge", a:0.1}], sp: [] },
+            { name: "Schuhe", geb: "Weberei", ek: "Schneidermeister", vk: "Tuchhändler", zutaten: [{n:"Leder", a:0.2}, {n:"Holz", a:0.1}, {n:"Werkzeuge", a:0.1}], sp: ["Armenhaus"] },
+            { name: "Schweine", geb: "Viehzucht", ek: "Zuchtmeister", vk: "Bauernmarkt", zutaten: [{n:"Wasser", a:30}, {n:"Rüben", a:40}], sp: [] },
+            { name: "Schwerter", geb: "Waffenschmiede", ek: "Schmiedemeister", vk: "Waffenhändler", zutaten: [{n:"Eisen", a:3}, {n:"Werkzeuge", a:3}, {n:"Silber", a:1}], sp: ["Stadtwache", "Kerker", "Königliches Arsenal"] },
+            { name: "Seide", geb: "Karawanserei", ek: "Diplomaten", vk: "Tuchhändler", zutaten: [{n:"Fuhrwerke", a:0.1}, {n:"Pferde", a:0.1}, {n:"Trockenfleisch", a:0.5}, {n:"Honig", a:1}], sp: [] },
+            { name: "Silber", geb: "Steinbruch", ek: "Steinmetzmeister", vk: "", zutaten: [{n:"Werkzeuge", a:7}, {n:"Wasser", a:30}], sp: ["Königliches Arsenal"] },
+            { name: "Silbergeschmeide", geb: "Goldschmiede", ek: "Schmiedemeister", vk: "Waffenhändler", zutaten: [{n:"Silber", a:5}, {n:"Werkzeuge", a:5}], sp: ["Stadtwache"] },
+            { name: "Sirup", geb: "Mühlenbäckerei", ek: "Müllermeister", vk: "", zutaten: [{n:"Rüben", a:2}, {n:"Wasser", a:2}], sp: [] },
+            { name: "Steine", geb: "Steinbruch", ek: "", vk: "", zutaten: [{n:"Werkzeuge", a:0.5}, {n:"Wasser", a:0.5}], sp: ["Königliches Arsenal"] },
+            { name: "Stühle", geb: "Schreinerei", ek: "Handwerksmeister", vk: "Handwerkermarkt", zutaten: [{n:"Holz", a:3}, {n:"Werkzeuge", a:1}, {n:"Eisen", a:0.1}], sp: ["Kerker"] },
+            { name: "Süßes Brot", geb: "Mühlenbäckerei", ek: "Müllermeister", vk: "Gasthaus", zutaten: [{n:"Mehl", a:3}, {n:"Milch", a:2}, {n:"Honig", a:1}, {n:"Sirup", a:1}, {n:"Trauben", a:1}], sp: ["Kerker"] },
+            { name: "Teppiche", geb: "Weberei", ek: "Schneidermeister", vk: "Tuchhändler", zutaten: [{n:"Holz", a:10}, {n:"Eisen", a:0.1}], sp: ["Kathedrale", "Gemeindehaus"] },
+            { name: "Tische", geb: "Schreinerei", ek: "Handwerksmeister", vk: "Handwerkermarkt", zutaten: [{n:"Holz", a:3}, {n:"Werkzeuge", a:1}], sp: ["Spital", "Universität", "Gemeindehaus"] },
+            { name: "Tran", geb: "Fischerei", ek: "Zuchtmeister", vk: "", zutaten: [{n:"Fische", a:1}, {n:"Wasser", a:1}], sp: ["Spital"] },
+            { name: "Trauben", geb: "Obstpflückerei", ek: "Klosterabt", vk: "Obstmarkt", zutaten: [{n:"Wasser", a:10}], sp: ["Höfischer Gemüsegarten"] },
+            { name: "Trockenfleisch", geb: "Schlachterei", ek: "Zuchtmeister", vk: "Viktualienmarkt", zutaten: [{n:"Schweine", a:0.1}], sp: ["Spital", "Stadtwache", "Armenhaus"] },
+            { name: "Tuch", geb: "Weberei", ek: "Schneidermeister", vk: "Tuchhändler", zutaten: [{n:"Wolle", a:10}, {n:"Werkzeuge", a:1}], sp: ["Spital"] },
             { name: "Wasser", geb: "Quellbrunnen", ek: "", vk: "", zutaten: [], sp: ["Kerker", "Höfischer Gemüsegarten"] },
-            { name: "Weihrauch", geb: "Karawanserei", ek: "Diplomaten", vk: "", zutaten: ["Fuhrwerke", "Pferde", "Trockenfleisch", "Schnaps"], sp: ["Kathedrale"] },
-            { name: "Wein", geb: "Brauerei", ek: "Klosterabt", vk: "Gasthaus", zutaten: ["Wasser", "Trauben", "Fässer"], sp: ["Kathedrale", "Armenhaus"] },
-            { name: "Werkzeuge", geb: "Manufaktur", ek: "Handwerksmeister", vk: "", zutaten: ["Eisen", "Holz"], sp: ["Höfischer Gemüsegarten", "Königliches Arsenal"] },
-            { name: "Wild", geb: "Viehzucht", ek: "Zuchtmeister", vk: "", zutaten: ["Wasser", "Rüben"], sp: [] },
-            { name: "Wildbret", geb: "Schlachterei", ek: "Zuchtmeister", vk: "Viktualienmarkt", zutaten: ["Wild", "Kräuter"], sp: ["Kathedrale", "Gemeindehaus"] },
-            { name: "Wolle", geb: "Viehzucht", ek: "Zuchtmeister", vk: "", zutaten: ["Wasser", "Rüben"], sp: ["Stadtwache", "Armenhaus"] },
-            { name: "Ziegen", geb: "Viehzucht", ek: "Zuchtmeister", vk: "Bauernmarkt", zutaten: ["Wasser", "Rüben"], sp: ["Gemeindehaus"] }
+            { name: "Weihrauch", geb: "Karawanserei", ek: "Diplomaten", vk: "", zutaten: [{n:"Fuhrwerke", a:0.1}, {n:"Pferde", a:0.1}, {n:"Trockenfleisch", a:0.5}, {n:"Schnaps", a:1}], sp: ["Kathedrale"] },
+            { name: "Wein", geb: "Brauerei", ek: "Klosterabt", vk: "Gasthaus", zutaten: [{n:"Trauben", a:2}, {n:"Wasser", a:1}, {n:"Fässer", a:0.1}], sp: ["Kathedrale", "Armenhaus"] },
+            { name: "Werkzeuge", geb: "Manufaktur", ek: "Handwerksmeister", vk: "", zutaten: [{n:"Eisen", a:1}, {n:"Holz", a:1}], sp: ["Höfischer Gemüsegarten", "Königliches Arsenal"] },
+            { name: "Wild", geb: "Viehzucht", ek: "Zuchtmeister", vk: "", zutaten: [{n:"Wasser", a:20}, {n:"Rüben", a:5}], sp: [] },
+            { name: "Wildbret", geb: "Schlachterei", ek: "Zuchtmeister", vk: "Viktualienmarkt", zutaten: [{n:"Wild", a:1}, {n:"Kräuter", a:0.3}], sp: ["Kathedrale", "Gemeindehaus"] },
+            { name: "Wolle", geb: "Viehzucht", ek: "Zuchtmeister", vk: "", zutaten: [{n:"Wasser", a:20}, {n:"Rüben", a:5}], sp: ["Stadtwache", "Armenhaus"] },
+            { name: "Ziegen", geb: "Viehzucht", ek: "Zuchtmeister", vk: "Bauernmarkt", zutaten: [{n:"Wasser", a:20}, {n:"Getreide", a:5}], sp: ["Gemeindehaus"] }
         ];
 
         let currentActive = null;
@@ -262,17 +291,28 @@
                 const item = database.find(i => i.name === name);
                 if (!item) return;
 
-                highlightCell('item', name, 'highlight-blue selected-target');
-                item.zutaten.forEach(z => highlightCell('item', z, 'highlight-red'));
-
-                database.filter(i => i.zutaten.includes(name)).forEach(i => {
-                    highlightCell('item', i.name, 'highlight-blue');
+                highlightCell('item', name, 'highlight-blue selected-target', name);
+                
+                // Rot: Vorprodukte (Zutaten für dieses Produkt)
+                item.zutaten.forEach(z => {
+                    highlightCell('item', z.n, 'highlight-red', `${z.n} (x${z.a})`);
                 });
 
+                // Blau: Folgeprodukte (Wo wird dieses Produkt als Zutat benötigt?)
+                const folgeProdukte = database.filter(i => i.zutaten.some(z => z.n === name));
+                folgeProdukte.forEach(i => {
+                    const zut = i.zutaten.find(z => z.n === name);
+                    highlightCell('item', i.name, 'highlight-blue', `${i.name} (x${zut.a})`);
+                });
+
+                // Grün: Gebäude
                 if (item.geb) highlightCell('geb', item.geb, 'highlight-green');
                 if (item.ek) highlightCell('ek', item.ek, 'highlight-green');
                 if (item.vk) highlightCell('vk', item.vk, 'highlight-green');
                 item.sp.forEach(s => highlightCell('sp', s, 'highlight-green'));
+
+                // BOM Box aktualisieren
+                renderBomBox(item, folgeProdukte);
 
             } else {
                 highlightCell(type, name, 'highlight-green selected-target');
@@ -286,21 +326,51 @@
 
                     if (match) highlightCell('item', i.name, 'highlight-green');
                 });
+
+                document.getElementById('bom-box').innerHTML = `<i>Gebäude/Ort <b>${name}</b> ausgewählt. Zugehörige Produkte sind grün hervorgehoben.</i>`;
             }
         }
 
-        function highlightCell(type, name, className) {
+        function highlightCell(type, name, className, label = null) {
             const cells = document.querySelectorAll(`.cell[data-type="${type}"][data-name="${name}"]`);
             cells.forEach(c => {
                 className.split(' ').forEach(cls => c.classList.add(cls));
+                if (label) c.textContent = label;
             });
+        }
+
+        function renderBomBox(item, folgeProdukte) {
+            const box = document.getElementById('bom-box');
+            
+            let zutatenHtml = item.zutaten.length > 0 
+                ? item.zutaten.map(z => `<li><b>${z.a}x</b> ${z.n}</li>`).join('') 
+                : '<li><i>Keine Vorprodukte (Rohstoff)</i></li>';
+
+            let folgeHtml = folgeProdukte.length > 0 
+                ? folgeProdukte.map(f => {
+                    const z = f.zutaten.find(zut => zut.n === item.name);
+                    return `<li><b>${f.name}</b> (benötigt ${z.a}x ${item.name})</li>`;
+                  }).join('') 
+                : '<li><i>Wird für kein weiteres Produkt direkt benötigt</i></li>';
+
+            box.innerHTML = `
+                <h3>Rezeptur für 1x ${item.name}</h3>
+                <p style="margin: 3px 0 8px 0; font-size:12px;"><b>Herstellung:</b> ${item.geb || 'Keine'} | <b>Forschung:</b> ${item.ek || 'Keine'}</p>
+                <b>Benötigte Zutaten (Vorprodukte):</b>
+                <ul class="bom-list" style="color: var(--color-red);">${zutatenHtml}</ul>
+                <br>
+                <b>Wird verwendet in (Folgeprodukte):</b>
+                <ul class="bom-list" style="color: var(--color-blue);">${folgeHtml}</ul>
+            `;
         }
 
         function clearAll() {
             currentActive = null;
             document.querySelectorAll('.cell').forEach(c => {
                 c.className = 'cell';
+                c.textContent = c.dataset.name;
             });
+            document.getElementById('bom-box').innerHTML = '<i>Klicke auf ein Produkt, um dessen Stückliste und Rezeptur anzuzeigen.</i>';
         }
     </script>
 </body>
