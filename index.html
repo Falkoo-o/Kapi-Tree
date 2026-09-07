@@ -22,15 +22,31 @@
             margin: 10px;
             font-size: 13px;
             user-select: none;
+            -webkit-user-select: none;
+        }
+
+        .header-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: var(--header-bg);
+            border: 1px solid var(--border-color);
+            padding: 4px 8px;
+            margin-top: 6px;
         }
 
         .section-title {
-            text-align: center;
             font-weight: bold;
-            background-color: var(--header-bg);
+        }
+
+        .reset-btn {
+            background-color: #e2da80;
             border: 1px solid var(--border-color);
-            padding: 3px;
-            margin-top: 6px;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: bold;
+            cursor: pointer;
         }
 
         .grid-container {
@@ -46,25 +62,30 @@
         .items-grid { grid-template-columns: repeat(6, 1fr); padding: 5px 0; }
 
         .cell {
-            padding: 3px 5px;
+            padding: 6px 4px;
             text-align: center;
             cursor: pointer;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
+            border: 1px solid transparent;
         }
 
         .items-grid .cell {
             text-align: left;
-            padding: 2px 8px;
+            padding: 4px 8px;
             font-weight: bold;
         }
 
-        /* Highlighting Status */
+        /* Touch & Active Highlighting */
         .cell.highlight-green { color: var(--color-green) !important; font-weight: bold; }
         .cell.highlight-red { color: var(--color-red) !important; font-weight: bold; }
         .cell.highlight-blue { color: var(--color-blue) !important; font-weight: bold; }
-        .cell.selected { background-color: #e2da80; }
+        
+        .cell.selected-target {
+            background-color: #e2da80;
+            border: 1px dashed #000;
+        }
 
         .legend {
             margin-top: 15px;
@@ -78,25 +99,28 @@
 </head>
 <body>
 
-    <div class="section-title">Produktionsstätte</div>
+    <div class="header-bar">
+        <span class="section-title">Produktionsstätte</span>
+        <button class="reset-btn" onclick="clearAll()">Auswahl aufheben</button>
+    </div>
     <div class="grid-container prod-grid" id="container-prod"></div>
 
-    <div class="section-title">Forschungsstätte</div>
+    <div class="section-title header-bar">Forschungsstätte</div>
     <div class="grid-container forsch-grid" id="container-forsch"></div>
 
-    <div class="section-title">Verkaufsstätte</div>
+    <div class="section-title header-bar">Verkaufsstätte</div>
     <div class="grid-container verk-grid" id="container-verk"></div>
 
-    <div class="section-title">Spezialgebäude / Lieferorte</div>
+    <div class="section-title header-bar">Spezialgebäude / Lieferorte</div>
     <div class="grid-container spez-grid" id="container-spez"></div>
 
-    <div class="section-title">Produkte</div>
+    <div class="section-title header-bar">Produkte</div>
     <div class="grid-container items-grid" id="container-items"></div>
 
     <div class="legend">
-        <span class="green">Grün</span> leuchten die jeweiligen Gebäude auf, in denen man das Produkt unter der Maus produzieren, erforschen, verkaufen oder an die man es liefern kann (bzw. bei Klick auf ein Gebäude alle zugehörigen Produkte).<br>
-        <span class="red">Rot</span> leuchten die Produkte auf, die man benötigt, um das Produkt unter der Maus herzustellen.<br>
-        <span class="blue">Blau</span> leuchten die Produkte auf, die man aus dem Produkt unter der Maus erstellen kann.
+        <span class="green">Grün</span> leuchten die jeweiligen Gebäude auf, in denen man das angemerkte Produkt produzieren, erforschen, verkaufen oder an die man es liefern kann (bzw. bei Tippen auf ein Gebäude alle zugehörigen Produkte).<br>
+        <span class="red">Rot</span> leuchten die Produkte auf, die man benötigt, um das angetippte Produkt herzustellen.<br>
+        <span class="blue">Blau</span> leuchten die Produkte auf, die man aus dem angetippten Produkt erstellen kann.
     </div>
 
     <script>
@@ -189,96 +213,4 @@
             { name: "Wasser", geb: "Quellbrunnen", ek: "", vk: "", zutaten: [], sp: ["Kerker", "Höfischer Gemüsegarten"] },
             { name: "Weihrauch", geb: "Karawanserei", ek: "Haus des Diplomaten", vk: "", zutaten: ["Fuhrwerke", "Pferde", "Trockenfleisch", "Schnaps"], sp: ["Kathedrale"] },
             { name: "Wein", geb: "Brauerei", ek: "Garten des Klosterabts", vk: "Gasthaus", zutaten: ["Wasser", "Trauben", "Fässer"], sp: ["Kathedrale", "Armenhaus"] },
-            { name: "Werkzeuge", geb: "Manufaktur", ek: "Hütte des Handwerksmeisters", vk: "", zutaten: ["Eisen", "Holz"], sp: ["Höfischer Gemüsegarten", "Königliches Arsenal"] },
-            { name: "Wild", geb: "Viehzucht", ek: "Hütte des Zuchtmeisters", vk: "", zutaten: ["Wasser", "Rüben"], sp: [] },
-            { name: "Wildbret", geb: "Schlachterei", ek: "Hütte des Zuchtmeisters", vk: "Viktualienmarkt", zutaten: ["Wild", "Kräuter"], sp: ["Kathedrale", "Gemeindehaus"] },
-            { name: "Wolle", geb: "Viehzucht", ek: "Hütte des Zuchtmeisters", vk: "", zutaten: ["Wasser", "Rüben"], sp: ["Stadtwache", "Armenhaus"] },
-            { name: "Ziegen", geb: "Viehzucht", ek: "Hütte des Zuchtmeisters", vk: "Bauernmarkt", zutaten: ["Wasser", "Rüben"], sp: ["Gemeindehaus"] }
-        ];
-
-        // Eindeutige Listen auslesen
-        const getUnique = key => [...new Set(database.map(i => i[key]).filter(Boolean))].sort();
-        const getUniqueArray = key => [...new Set(database.flatMap(i => i[key]).filter(Boolean))].sort();
-
-        const prodList = getUnique('geb');
-        const forschList = getUnique('ek');
-        const verkList = getUnique('vk');
-        const spezList = getUniqueArray('sp');
-        const itemsList = database.map(i => i.name).sort();
-
-        // HTML-Tabellen dynamisch füllen
-        function buildGrid(containerId, list, type) {
-            const container = document.getElementById(containerId);
-            list.forEach(name => {
-                const div = document.createElement('div');
-                div.className = 'cell';
-                div.textContent = name;
-                div.dataset.name = name;
-                div.dataset.type = type;
-                
-                div.addEventListener('mouseenter', () => handleHover(name, type));
-                div.addEventListener('mouseleave', clearAll);
-                container.appendChild(div);
-            });
-        }
-
-        buildGrid('container-prod', prodList, 'geb');
-        buildGrid('container-forsch', forschList, 'ek');
-        buildGrid('container-verk', verkList, 'vk');
-        buildGrid('container-spez', spezList, 'sp');
-        buildGrid('container-items', itemsList, 'item');
-
-        // Event-Handler
-        function handleHover(name, type) {
-            clearAll();
-
-            if (type === 'item') {
-                const item = database.find(i => i.name === name);
-                if (!item) return;
-
-                // Eigenes Produkt blau/fett markieren
-                highlightCell('item', name, 'highlight-blue');
-
-                // Zutaten -> Rot
-                item.zutaten.forEach(z => highlightCell('item', z, 'highlight-red'));
-
-                // Produkte, in die dieses Item einfließt -> Blau
-                database.filter(i => i.zutaten.includes(name)).forEach(i => {
-                    highlightCell('item', i.name, 'highlight-blue');
-                });
-
-                // Gebäude -> Grün
-                if (item.geb) highlightCell('geb', item.geb, 'highlight-green');
-                if (item.ek) highlightCell('ek', item.ek, 'highlight-green');
-                if (item.vk) highlightCell('vk', item.vk, 'highlight-green');
-                item.sp.forEach(s => highlightCell('sp', s, 'highlight-green'));
-
-            } else {
-                // Gebäude ausgewählt -> Zugehöriges Gebäude grün & Produkte grün
-                highlightCell(type, name, 'highlight-green');
-
-                database.forEach(i => {
-                    let match = false;
-                    if (type === 'geb' && i.geb === name) match = true;
-                    if (type === 'ek' && i.ek === name) match = true;
-                    if (type === 'vk' && i.vk === name) match = true;
-                    if (type === 'sp' && i.sp.includes(name)) match = true;
-
-                    if (match) highlightCell('item', i.name, 'highlight-green');
-                });
-            }
-        }
-
-        function highlightCell(type, name, className) {
-            const cells = document.querySelectorAll(`.cell[data-type="${type}"][data-name="${name}"]`);
-            cells.forEach(c => c.classList.add(className));
-        }
-
-        function clearAll() {
-            document.querySelectorAll('.cell').forEach(c => {
-                c.className = 'cell';
-            });
-        }
-    </script>
-</body>
-</html>
+            { name: "Werkzeuge", geb: "Manufaktur", ek: "H
