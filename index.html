@@ -1,404 +1,523 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tech Tree & BOM - Kapi Regnum</title>
-    <style>
-        :root {
-            --bg-main: #fbf9d8;
-            --border-color: #8b7d3a;
-            --header-bg: #f4eea2;
-            --text-color: #000;
-            --color-green: #008000;
-            --color-red: #d00000;
-            --color-blue: #0000d0;
-        }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kapi-Game Warenrechner & Produktionsketten</title>
+  <style>
+    :root {
+      --bg-color: #f4f6f9;
+      --card-bg: #ffffff;
+      --text-color: #333333;
+      --border-color: #dddddd;
+      --primary-color: #2c3e50;
+      --accent-color: #3498db;
+      --highlight-bg: #eaf2f8;
+    }
 
-        body {
-            font-family: Arial, Helvetica, sans-serif;
-            background-color: var(--bg-main);
-            color: var(--text-color);
-            margin: 10px;
-            font-size: 13px;
-            user-select: none;
-            -webkit-user-select: none;
-        }
+    body {
+      font-family: Arial, sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-color);
+      margin: 0;
+      padding: 20px;
+    }
 
-        .header-bar {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background-color: var(--header-bg);
-            border: 1px solid var(--border-color);
-            padding: 4px 8px;
-            margin-top: 6px;
-        }
+    h1, h2, h3 {
+      color: var(--primary-color);
+      margin-top: 0;
+    }
 
-        .section-title {
-            font-weight: bold;
-        }
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 350px 1fr;
+      gap: 20px;
+    }
 
-        .reset-btn {
-            background-color: #e2da80;
-            border: 1px solid var(--border-color);
-            padding: 3px 8px;
-            border-radius: 4px;
-            font-size: 12px;
-            font-weight: bold;
-            cursor: pointer;
-        }
+    .panel {
+      background: var(--card-bg);
+      border-radius: 8px;
+      padding: 20px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
 
-        .grid-container {
-            display: grid;
-            border: 1px solid var(--border-color);
-            background-color: var(--bg-main);
-            min-height: 25px;
-        }
+    .controls-panel {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
 
-        .prod-grid { grid-template-columns: repeat(8, 1fr); }
-        .forsch-grid { grid-template-columns: repeat(8, 1fr); }
-        .verk-grid { grid-template-columns: repeat(8, 1fr); }
-        .spez-grid { grid-template-columns: repeat(8, 1fr); }
-        .items-grid { grid-template-columns: repeat(6, 1fr); padding: 5px 0; }
+    label {
+      font-weight: bold;
+      font-size: 0.9em;
+      margin-bottom: 5px;
+      display: block;
+    }
 
-        .cell {
-            padding: 6px 4px;
-            text-align: center;
-            cursor: pointer;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            border: 1px solid transparent;
-        }
+    input[type="text"], input[type="number"], select {
+      width: 100%;
+      padding: 8px 12px;
+      border: 1px solid var(--border-color);
+      border-radius: 4px;
+      box-sizing: border-box;
+    }
 
-        .items-grid .cell {
-            text-align: left;
-            padding: 4px 8px;
-            font-weight: bold;
-        }
+    .btn-group {
+      display: flex;
+      gap: 10px;
+    }
 
-        .cell.highlight-green { color: var(--color-green) !important; font-weight: bold; }
-        .cell.highlight-red { color: var(--color-red) !important; font-weight: bold; }
-        .cell.highlight-blue { color: var(--color-blue) !important; font-weight: bold; }
-        
-        .cell.selected-target {
-            background-color: #e2da80;
-            border: 1px dashed #000;
-        }
+    button {
+      background-color: var(--accent-color);
+      color: white;
+      border: none;
+      padding: 10px 15px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-weight: bold;
+      transition: background-color 0.2s;
+    }
 
-        /* BOM Box Styling */
-        .bom-box {
-            margin-top: 8px;
-            background-color: #fffdf0;
-            border: 1px solid var(--border-color);
-            padding: 10px;
-            min-height: 40px;
-        }
+    button:hover {
+      background-color: #2980b9;
+    }
 
-        .bom-box h3 {
-            margin: 0 0 6px 0;
-            font-size: 14px;
-            color: #4a4218;
-        }
+    button.secondary {
+      background-color: #7f8c8d;
+    }
 
-        .bom-list {
-            margin: 0;
-            padding-left: 18px;
-        }
+    button.secondary:hover {
+      background-color: #6c7a89;
+    }
 
-        .bom-list li {
-            margin-bottom: 3px;
-        }
+    .tree-view, .summary-view {
+      margin-top: 20px;
+    }
 
-        .legend {
-            margin-top: 15px;
-            font-size: 12px;
-            line-height: 1.6;
-        }
-        .legend .green { color: var(--color-green); font-weight: bold; }
-        .legend .red { color: var(--color-red); font-weight: bold; }
-        .legend .blue { color: var(--color-blue); font-weight: bold; }
-    </style>
+    ul.tree {
+      list-style-type: none;
+      padding-left: 20px;
+    }
+
+    ul.tree ul {
+      list-style-type: none;
+      padding-left: 25px;
+      border-left: 2px dashed var(--border-color);
+    }
+
+    li.tree-item {
+      margin: 5px 0;
+      position: relative;
+    }
+
+    .node-card {
+      background: var(--bg-color);
+      border: 1px solid var(--border-color);
+      padding: 8px 12px;
+      border-radius: 4px;
+      display: inline-block;
+      min-width: 250px;
+    }
+
+    .node-title {
+      font-weight: bold;
+    }
+
+    .node-details {
+      font-size: 0.85em;
+      color: #666;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+    }
+
+    th, td {
+      border: 1px solid var(--border-color);
+      padding: 8px 12px;
+      text-align: left;
+    }
+
+    th {
+      background-color: var(--highlight-bg);
+      color: var(--primary-color);
+    }
+
+    tr:nth-child(even) {
+      background-color: #f9f9f9;
+    }
+
+    .file-actions {
+      margin-top: 15px;
+      padding-top: 15px;
+      border-top: 1px solid var(--border-color);
+    }
+
+    .hidden {
+      display: none;
+    }
+  </style>
 </head>
 <body>
 
-    <div class="header-bar">
-        <span class="section-title">Produktionsstätte</span>
-        <button class="reset-btn" onclick="clearAll()">Auswahl aufheben</button>
+  <h1>Kapi-Game Warenrechner & Produktionsketten</h1>
+
+  <div class="container">
+    <!-- LINKES PANAL: Steuerung & Filter -->
+    <div class="panel controls-panel">
+      <h2>Steuerung</h2>
+      
+      <div>
+        <label for="search">Suchen / Filtern:</label>
+        <input type="text" id="search" placeholder="Name, Gebäude, Markt...">
+      </div>
+
+      <div>
+        <label for="itemSelect">Ware auswählen:</label>
+        <select id="itemSelect" size="10"></select>
+      </div>
+
+      <div>
+        <label for="quantity">Menge:</label>
+        <input type="number" id="quantity" value="1" min="0.01" step="any">
+      </div>
+
+      <div class="file-actions">
+        <h3>Datenbank sichern / laden</h3>
+        <div class="btn-group">
+          <button id="exportBtn" class="secondary">Export (JSON)</button>
+          <button id="importBtn" class="secondary" onclick="document.getElementById('fileInput').click()">Import (JSON)</button>
+          <input type="file" id="fileInput" class="hidden" accept=".json">
+        </div>
+      </div>
     </div>
-    <div class="grid-container prod-grid" id="container-prod"></div>
 
-    <div class="section-title header-bar">Forschungsstätte</div>
-    <div class="grid-container forsch-grid" id="container-forsch"></div>
+    <!-- RECHTES PANAL: Ergebnisse & Baumansicht -->
+    <div class="panel">
+      <div id="detailsHeader">
+        <h2>Bitte wähle eine Ware aus</h2>
+      </div>
 
-    <div class="section-title header-bar">Verkaufsstätte</div>
-    <div class="grid-container verk-grid" id="container-verk"></div>
+      <div class="summary-view">
+        <h3>Gesamter Rohstoffbedarf (kumuliert)</h3>
+        <table id="summaryTable">
+          <thead>
+            <tr>
+              <th>Rohstoff / Ware</th>
+              <th>Benötigte Menge</th>
+              <th>Produzierendes Gebäude</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td colspan="3">Keine Auswahl</td></tr>
+          </tbody>
+        </table>
+      </div>
 
-    <div class="section-title header-bar">Spezialgebäude / Lieferorte</div>
-    <div class="grid-container spez-grid" id="container-spez"></div>
-
-    <div class="section-title header-bar">Produkte</div>
-    <div class="grid-container items-grid" id="container-items"></div>
-
-    <div class="section-title header-bar">Stückliste (BOM)</div>
-    <div class="bom-box" id="bom-box">
-        <i>Klicke auf ein Produkt, um dessen Stückliste und Rezeptur anzuzeigen.</i>
+      <div class="tree-view">
+        <h3>Produktionsbaum</h3>
+        <div id="treeContainer"></div>
+      </div>
     </div>
+  </div>
 
-    <div class="legend">
-        <span class="green">Grün</span> leuchten die jeweiligen Gebäude auf, in denen man das angemerkte Produkt produzieren, erforschen, verkaufen oder an die man es liefern kann (bzw. bei Tippen auf ein Gebäude alle zugehörigen Produkte).<br>
-        <span class="red">Rot</span> leuchten die Produkte auf, die man benötigt, um das angetippte Produkt herzustellen (inkl. benötigter Menge).<br>
-        <span class="blue">Blau</span> leuchten die Produkte auf, die man aus dem angetippten Produkt erstellen kann (inkl. Verbrauchsmenge im Folgeprodukt).
-    </div>
+  <script>
+    // ==========================================
+    // 1. VOLLSTÄNDIGE BOM-DATENBANK
+    // ==========================================
+    let DATABASE = [
+      { name: "Äpfel", geb: "Obstpflückerei", ek: "Klosterabt", vk: "Obstmarkt", zutaten: [{n:"Wasser", a:10}], sp: ["Stadtwache", "Universität", "Armenhaus", "Kerker", "Höfischer Gemüsegarten"] },
+      { name: "Arkebusen", geb: "Waffenschmiede", ek: "Schmiedemeister", vk: "Waffenhändler", zutaten: [{n:"Eisen", a:2}, {n:"Salpeter", a:2}, {n:"Holz", a:2}], sp: ["Stadtwache", "Königliches Arsenal"] },
+      { name: "Bänke", geb: "Schreinerei", ek: "Handwerksmeister", vk: "", zutaten: [{n:"Holz", a:4}, {n:"Werkzeuge", a:1}, {n:"Eisen", a:0.1}, {n:"Leder", a:2}], sp: ["Kathedrale", "Universität", "Kerker", "Höfischer Gemüsegarten"] },
+      { name: "Beeren", geb: "Obstpflückerei", ek: "Klosterabt", vk: "Obstmarkt", zutaten: [{n:"Wasser", a:10}], sp: ["Spital", "Stadtwache", "Universität", "Höfischer Gemüsegarten"] },
+      { name: "Bibeln", geb: "Druckerei", ek: "Druckermeister", vk: "", zutaten: [{n:"Holz", a:5}, {n:"Wasser", a:2}, {n:"Werkzeuge", a:0.1}, {n:"Gold", a:0.1}, {n:"Leder", a:1}], sp: ["Kathedrale"] },
+      { name: "Bienenwachs", geb: "Bauernhof", ek: "Klosterabt", vk: "", zutaten: [{n:"Kräuter", a:5}], sp: [] },
+      { name: "Bier", geb: "Brauerei", ek: "Klosterabt", vk: "Gasthaus", zutaten: [{n:"Wasser", a:2}, {n:"Getreide", a:1}, {n:"Fässer", a:0.1}], sp: ["Stadtwache", "Armenhaus"] },
+      { name: "Birnen", geb: "Obstpflückerei", ek: "Klosterabt", vk: "Obstmarkt", zutaten: [{n:"Wasser", a:10}], sp: ["Gemeindehaus", "Höfischer Gemüsegarten"] },
+      { name: "Birnenschnaps", geb: "Brauerei", ek: "Müllermeister", vk: "Gasthaus", zutaten: [{n:"Birnen", a:10}, {n:"Wasser", a:10}, {n:"Holz", a:2}], sp: [] },
+      { name: "Boote", geb: "Manufaktur", ek: "Handwerksmeister", vk: "", zutaten: [{n:"Holz", a:4}, {n:"Pech", a:1}, {n:"Werkzeuge", a:2}], sp: ["Stadtwache", "Königliches Arsenal"] },
+      { name: "Brote", geb: "Bauernhof", ek: "Klosterabt", vk: "Bauernmarkt", zutaten: [{n:"Wasser", a:1}, {n:"Getreide", a:2}], sp: ["Spital", "Armenhaus", "Kerker"] },
+      { name: "Bücher", geb: "Druckerei", ek: "Druckermeister", vk: "", zutaten: [{n:"Holz", a:4}, {n:"Wasser", a:2}, {n:"Werkzeuge", a:0.1}], sp: ["Spital", "Universität", "Gemeindehaus"] },
+      { name: "Daunenbetten", geb: "Weberei", ek: "Schneidermeister", vk: "Tuchhändler", zutaten: [{n:"Gänse", a:20}, {n:"Werkzeuge", a:2}, {n:"Tuch", a:1}], sp: [] },
+      { name: "Eier", geb: "Viehzucht", ek: "Zuchtmeister", vk: "Bauernmarkt", zutaten: [{n:"Hühner", a:0.1}, {n:"Getreide", a:0.1}, {n:"Wasser", a:1}], sp: ["Kerker"] },
+      { name: "Eisen", geb: "Manufaktur", ek: "Handwerksmeister", vk: "", zutaten: [{n:"Eisenerz", a:2}, {n:"Kohle", a:1}], sp: ["Königliches Arsenal"] },
+      { name: "Eisenerz", geb: "Steinbruch", ek: "Steinmetzmeister", vk: "", zutaten: [{n:"Wasser", a:10}], sp: [] },
+      { name: "Fässer", geb: "Manufaktur", ek: "Handwerksmeister", vk: "Handwerkermarkt", zutaten: [{n:"Holz", a:0.5}, {n:"Eisen", a:0.1}, {n:"Werkzeuge", a:0.2}], sp: ["Höfischer Gemüsegarten", "Königliches Arsenal"] },
+      { name: "Fische", geb: "Fischerei", ek: "Zuchtmeister", vk: "Viktualienmarkt", zutaten: [{n:"Boote", a:0.05}, {n:"Netze", a:0.1}], sp: ["Armenhaus"] },
+      { name: "Flachs", geb: "Bauernhof", ek: "Klosterabt", vk: "", zutaten: [{n:"Wasser", a:10}], sp: ["Höfischer Gemüsegarten", "Königliches Arsenal"] },
+      { name: "Fuhrwerke", geb: "Manufaktur", ek: "Handwerksmeister", vk: "", zutaten: [{n:"Holz", a:2}, {n:"Eisen", a:0.5}, {n:"Werkzeuge", a:1}], sp: ["Stadtwache", "Gemeindehaus", "Höfischer Gemüsegarten", "Königliches Arsenal"] },
+      { name: "Gänse", geb: "Viehzucht", ek: "Zuchtmeister", vk: "Bauernmarkt", zutaten: [{n:"Wasser", a:15}, {n:"Getreide", a:4}], sp: [] },
+      { name: "Gänsebraten", geb: "Schlachterei", ek: "Zuchtmeister", vk: "Viktualienmarkt", zutaten: [{n:"Gänse", a:1}, {n:"Kräuter", a:0.3}, {n:"Äpfel", a:3}], sp: [] },
+      { name: "Getreide", geb: "Bauernhof", ek: "Klosterabt", vk: "Viktualienmarkt", zutaten: [{n:"Wasser", a:2}], sp: ["Höfischer Gemüsegarten"] },
+      { name: "Gewänder", geb: "Weberei", ek: "Schneidermeister", vk: "Tuchhändler", zutaten: [{n:"Wolle", a:10}, {n:"Seide", a:0.1}], sp: ["Kathedrale", "Gemeindehaus"] },
+      { name: "Gewürze", geb: "Karawanserei", ek: "Diplomaten", vk: "Viktualienmarkt", zutaten: [{n:"Fuhrwerke", a:0.1}, {n:"Pferde", a:0.1}, {n:"Trockenfleisch", a:0.5}, {n:"Kräuter", a:2}], sp: ["Kathedrale", "Armenhaus"] },
+      { name: "Gold", geb: "Steinbruch", ek: "Steinmetzmeister", vk: "", zutaten: [{n:"Werkzeuge", a:10}, {n:"Wasser", a:50}], sp: ["Kathedrale"] },
+      { name: "Goldgeschmeide", geb: "Goldschmiede", ek: "Schmiedemeister", vk: "Ablasshandel", zutaten: [{n:"Gold", a:5}, {n:"Werkzeuge", a:5}, {n:"Perlen", a:1}], sp: ["Kathedrale", "Gemeindehaus"] },
+      { name: "Heiligenstatuen", geb: "Goldschmiede", ek: "Schmiedemeister", vk: "Ablasshandel", zutaten: [{n:"Gold", a:1}, {n:"Silber", a:1}, {n:"Holz", a:2}, {n:"Werkzeuge", a:5}], sp: ["Kathedrale"] },
+      { name: "Hellebarden", geb: "Waffenschmiede", ek: "Schmiedemeister", vk: "Waffenhändler", zutaten: [{n:"Eisen", a:2}, {n:"Werkzeuge", a:2}, {n:"Holz", a:4}], sp: ["Kerker", "Königliches Arsenal"] },
+      { name: "Holz", geb: "Holzfäller", ek: "", vk: "", zutaten: [{n:"Wasser", a:20}], sp: [] },
+      { name: "Honig", geb: "Bauernhof", ek: "Klosterabt", vk: "Bauernmarkt", zutaten: [{n:"Kräuter", a:5}], sp: ["Kathedrale", "Gemeindehaus", "Armenhaus"] },
+      { name: "Hühner", geb: "Viehzucht", ek: "Zuchtmeister", vk: "Bauernmarkt", zutaten: [{n:"Wasser", a:20}, {n:"Getreide", a:5}], sp: ["Spital"] },
+      { name: "Käse", geb: "Bauernhof", ek: "Müllermeister", vk: "Bauernmarkt", zutaten: [{n:"Milch", a:1}, {n:"Wasser", a:1}, {n:"Salz", a:0.05}], sp: ["Kerker"] },
+      { name: "Kandierte Äpfel", geb: "Mühlenbäckerei", ek: "Müllermeister", vk: "Viktualienmarkt", zutaten: [{n:"Äpfel", a:1}, {n:"Sirup", a:1}], sp: ["Kerker"] },
+      { name: "Kerzen", geb: "Bauernhof", ek: "Klosterabt", vk: "Viktualienmarkt", zutaten: [{n:"Bienenwachs", a:0.2}, {n:"Werkzeuge", a:0.1}, {n:"Flachs", a:0.1}], sp: [] },
+      { name: "Kirschen", geb: "Obstpflückerei", ek: "Klosterabt", vk: "Obstmarkt", zutaten: [{n:"Wasser", a:10}], sp: ["Gemeindehaus", "Armenhaus", "Höfischer Gemüsegarten"] },
+      { name: "Kirschwasser", geb: "Brauerei", ek: "Müllermeister", vk: "Gasthaus", zutaten: [{n:"Kirschen", a:10}, {n:"Wasser", a:10}, {n:"Holz", a:2}], sp: ["Kerker"] },
+      { name: "Kleidung", geb: "Weberei", ek: "Schneidermeister", vk: "Tuchhändler", zutaten: [{n:"Wolle", a:7}, {n:"Flachs", a:10}], sp: ["Armenhaus"] },
+      { name: "Kohle", geb: "Holzfäller", ek: "Handwerksmeister", vk: "", zutaten: [{n:"Holz", a:2}], sp: [] },
+      { name: "Kräuter", geb: "Bauernhof", ek: "Klosterabt", vk: "Bauernmarkt", zutaten: [{n:"Wasser", a:5}], sp: ["Spital", "Kathedrale", "Gemeindehaus", "Höfischer Gemüsegarten"] },
+      { name: "Lampenöl", geb: "Fischerei", ek: "Zuchtmeister", vk: "Viktualienmarkt", zutaten: [{n:"Tran", a:0.1}, {n:"Kohle", a:0.1}], sp: [] },
+      { name: "Lebkuchen", geb: "Mühlenbäckerei", ek: "Müllermeister", vk: "Gasthaus", zutaten: [{n:"Mehl", a:2}, {n:"Gewürze", a:0.1}, {n:"Wasser", a:10}, {n:"Sirup", a:1}, {n:"Honig", a:0.1}], sp: ["Kerker"] },
+      { name: "Leder", geb: "Weberei", ek: "Schneidermeister", vk: "", zutaten: [{n:"Ziegen", a:1}, {n:"Holz", a:2}, {n:"Werkzeuge", a:0.2}], sp: ["Stadtwache", "Kathedrale", "Gemeindehaus", "Königliches Arsenal"] },
+      { name: "Lederwams", geb: "Waffenschmiede", ek: "Schmiedemeister", vk: "Waffenhändler", zutaten: [{n:"Leder", a:2}, {n:"Werkzeuge", a:2}, {n:"Tuch", a:1}, {n:"Wasser", a:10}], sp: ["Kerker", "Königliches Arsenal"] },
+      { name: "Mehl", geb: "Mühlenbäckerei", ek: "Müllermeister", vk: "", zutaten: [{n:"Getreide", a:1}, {n:"Steine", a:0.05}], sp: [] },
+      { name: "Met", geb: "Brauerei", ek: "Klosterabt", vk: "Gasthaus", zutaten: [{n:"Wasser", a:2}, {n:"Honig", a:2}, {n:"Fässer", a:0.1}], sp: ["Spital"] },
+      { name: "Milch", geb: "Viehzucht", ek: "Zuchtmeister", vk: "Bauernmarkt", zutaten: [{n:"Wasser", a:0.1}, {n:"Ziegen", a:0.1}, {n:"Rüben", a:0.1}], sp: ["Armenhaus"] },
+      { name: "Muschelketten", geb: "Goldschmiede", ek: "Schmiedemeister", vk: "Ablasshandel", zutaten: [{n:"Muscheln", a:10}, {n:"Gold", a:0.1}, {n:"Werkzeuge", a:1}], sp: [] },
+      { name: "Muscheln", geb: "Fischerei", ek: "Zuchtmeister", vk: "", zutaten: [{n:"Boote", a:0.1}, {n:"Werkzeuge", a:0.1}], sp: [] },
+      { name: "Netze", geb: "Weberei", ek: "Schneidermeister", vk: "", zutaten: [{n:"Flachs", a:5}, {n:"Werkzeuge", a:0.1}], sp: [] },
+      { name: "Nüsse", geb: "Obstpflückerei", ek: "Klosterabt", vk: "Obstmarkt", zutaten: [{n:"Wasser", a:10}], sp: ["Spital", "Universität", "Höfischer Gemüsegarten"] },
+      { name: "Pamphlete", geb: "Druckerei", ek: "Druckermeister", vk: "", zutaten: [{n:"Holz", a:2}, {n:"Wasser", a:1}, {n:"Werkzeuge", a:0.1}], sp: ["Kerker"] },
+      { name: "Pech", geb: "Holzfäller", ek: "Handwerksmeister", vk: "", zutaten: [{n:"Wasser", a:2}, {n:"Holz", a:5}], sp: [] },
+      { name: "Pergamente", geb: "Druckerei", ek: "Druckermeister", vk: "", zutaten: [{n:"Holz", a:1}, {n:"Wasser", a:0.5}, {n:"Werkzeuge", a:0.1}], sp: ["Universität", "Gemeindehaus"] },
+      { name: "Perlen", geb: "Fischerei", ek: "Zuchtmeister", vk: "", zutaten: [{n:"Boote", a:0.1}, {n:"Werkzeuge", a:0.2}], sp: [] },
+      { name: "Perlenketten", geb: "Goldschmiede", ek: "Schmiedemeister", vk: "Ablasshandel", zutaten: [{n:"Perlen", a:20}, {n:"Gold", a:0.1}, {n:"Werkzeuge", a:1}], sp: ["Kathedrale"] },
+      { name: "Pferde", geb: "Viehzucht", ek: "Zuchtmeister", vk: "", zutaten: [{n:"Wasser", a:200}, {n:"Rüben", a:300}], sp: ["Stadtwache", "Kathedrale"] },
+      { name: "Pökelfleisch", geb: "Schlachterei", ek: "Zuchtmeister", vk: "Viktualienmarkt", zutaten: [{n:"Schweine", a:0.2}, {n:"Salz", a:0.5}, {n:"Kräuter", a:0.5}, {n:"Gewürze", a:0.1}], sp: ["Spital", "Stadtwache", "Armenhaus"] },
+      { name: "Räucherfisch", geb: "Fischerei", ek: "Zuchtmeister", vk: "Bauernmarkt", zutaten: [{n:"Fische", a:1}, {n:"Kohle", a:0.5}, {n:"Kräuter", a:0.3}], sp: [] },
+      { name: "Regale", geb: "Schreinerei", ek: "Handwerksmeister", vk: "Handwerkermarkt", zutaten: [{n:"Holz", a:3}, {n:"Werkzeuge", a:1}, {n:"Eisen", a:0.1}], sp: ["Spital", "Universität", "Gemeindehaus", "Höfischer Gemüsegarten"] },
+      { name: "Rüben", geb: "Bauernhof", ek: "Klosterabt", vk: "", zutaten: [{n:"Wasser", a:1}], sp: ["Höfischer Gemüsegarten"] },
+      { name: "Rüstungen", geb: "Waffenschmiede", ek: "Schmiedemeister", vk: "Waffenhändler", zutaten: [{n:"Eisen", a:5}, {n:"Werkzeuge", a:5}, {n:"Gold", a:1}], sp: ["Stadtwache", "Königliches Arsenal"] },
+      { name: "Salpeter", geb: "Steinbruch", ek: "Steinmetzmeister", vk: "", zutaten: [{n:"Werkzeuge", a:5}, {n:"Wasser", a:5}, {n:"Holz", a:5}], sp: ["Stadtwache"] },
+      { name: "Salz", geb: "Karawanserei", ek: "Diplomaten", vk: "Viktualienmarkt", zutaten: [{n:"Fuhrwerke", a:0.1}, {n:"Pferde", a:0.1}, {n:"Brote", a:5}, {n:"Teppiche", a:0.5}], sp: ["Spital"] },
+      { name: "Schilde", geb: "Waffenschmiede", ek: "Schmiedemeister", vk: "Waffenhändler", zutaten: [{n:"Holz", a:3}, {n:"Eisen", a:1}, {n:"Kohle", a:1}, {n:"Werkzeuge", a:2}], sp: ["Kerker", "Königliches Arsenal"] },
+      { name: "Schlachtrösser", geb: "Waffenschmiede", ek: "Schmiedemeister", vk: "Waffenhändler", zutaten: [{n:"Pferde", a:1}, {n:"Eisen", a:5}, {n:"Leder", a:5}], sp: ["Königliches Arsenal"] },
+      { name: "Schnaps", geb: "Brauerei", ek: "Klosterabt", vk: "Gasthaus", zutaten: [{n:"Wasser", a:10}, {n:"Kräuter", a:5}, {n:"Fässer", a:0.1}], sp: ["Spital", "Stadtwache", "Armenhaus"] },
+      { name: "Schränke", geb: "Schreinerei", ek: "Handwerksmeister", vk: "Handwerkermarkt", zutaten: [{n:"Holz", a:10}, {n:"Werkzeuge", a:2}, {n:"Eisen", a:0.2}], sp: ["Gemeindehaus", "Armenhaus"] },
+      { name: "Schreibfedern", geb: "Druckerei", ek: "Handwerksmeister", vk: "Handwerkermarkt", zutaten: [{n:"Gänse", a:0.1}, {n:"Werkzeuge", a:0.1}], sp: [] },
+      { name: "Schuhe", geb: "Weberei", ek: "Schneidermeister", vk: "Tuchhändler", zutaten: [{n:"Leder", a:0.2}, {n:"Holz", a:0.1}, {n:"Werkzeuge", a:0.1}], sp: ["Armenhaus"] },
+      { name: "Schweine", geb: "Viehzucht", ek: "Zuchtmeister", vk: "Bauernmarkt", zutaten: [{n:"Wasser", a:30}, {n:"Rüben", a:40}], sp: [] },
+      { name: "Schwerter", geb: "Waffenschmiede", ek: "Schmiedemeister", vk: "Waffenhändler", zutaten: [{n:"Eisen", a:3}, {n:"Werkzeuge", a:3}, {n:"Silber", a:1}], sp: ["Stadtwache", "Kerker", "Königliches Arsenal"] },
+      { name: "Seide", geb: "Karawanserei", ek: "Diplomaten", vk: "Tuchhändler", zutaten: [{n:"Fuhrwerke", a:0.1}, {n:"Pferde", a:0.1}, {n:"Trockenfleisch", a:0.5}, {n:"Honig", a:1}], sp: [] },
+      { name: "Silber", geb: "Steinbruch", ek: "Steinmetzmeister", vk: "", zutaten: [{n:"Werkzeuge", a:7}, {n:"Wasser", a:30}], sp: ["Königliches Arsenal"] },
+      { name: "Silbergeschmeide", geb: "Goldschmiede", ek: "Schmiedemeister", vk: "Waffenhändler", zutaten: [{n:"Silber", a:5}, {n:"Werkzeuge", a:5}], sp: ["Stadtwache"] },
+      { name: "Sirup", geb: "Mühlenbäckerei", ek: "Müllermeister", vk: "", zutaten: [{n:"Rüben", a:2}, {n:"Wasser", a:2}], sp: [] },
+      { name: "Steine", geb: "Steinbruch", ek: "", vk: "", zutaten: [{n:"Werkzeuge", a:0.5}, {n:"Wasser", a:0.5}], sp: ["Königliches Arsenal"] },
+      { name: "Stühle", geb: "Schreinerei", ek: "Handwerksmeister", vk: "Handwerkermarkt", zutaten: [{n:"Holz", a:3}, {n:"Werkzeuge", a:1}, {n:"Eisen", a:0.1}], sp: ["Kerker"] },
+      { name: "Süßes Brot", geb: "Mühlenbäckerei", ek: "Müllermeister", vk: "Gasthaus", zutaten: [{n:"Mehl", a:3}, {n:"Milch", a:2}, {n:"Honig", a:1}, {n:"Sirup", a:1}, {n:"Trauben", a:1}], sp: ["Kerker"] },
+      { name: "Teppiche", geb: "Weberei", ek: "Schneidermeister", vk: "Tuchhändler", zutaten: [{n:"Wolle", a:30}, {n:"Werkzeuge", a:2}], sp: ["Kathedrale", "Gemeindehaus"] },
+      { name: "Tische", geb: "Schreinerei", ek: "Handwerksmeister", vk: "Handwerkermarkt", zutaten: [{n:"Holz", a:5}, {n:"Werkzeuge", a:1}, {n:"Eisen", a:0.1}], sp: ["Spital", "Universität", "Gemeindehaus"] },
+      { name: "Tran", geb: "Fischerei", ek: "Zuchtmeister", vk: "", zutaten: [{n:"Fische", a:0.1}, {n:"Wasser", a:5}], sp: ["Spital"] },
+      { name: "Trauben", geb: "Obstpflückerei", ek: "Klosterabt", vk: "Obstmarkt", zutaten: [{n:"Wasser", a:10}], sp: ["Höfischer Gemüsegarten"] },
+      { name: "Trockenfleisch", geb: "Schlachterei", ek: "Zuchtmeister", vk: "Viktualienmarkt", zutaten: [{n:"Schweine", a:0.2}, {n:"Kräuter", a:0.5}], sp: ["Spital", "Stadtwache", "Armenhaus"] },
+      { name: "Tuch", geb: "Weberei", ek: "Schneidermeister", vk: "Tuchhändler", zutaten: [{n:"Wolle", a:7}, {n:"Werkzeuge", a:0.1}], sp: ["Spital"] },
+      { name: "Wasser", geb: "Quellbrunnen", ek: "", vk: "", zutaten: [], sp: ["Kerker", "Höfischer Gemüsegarten"] },
+      { name: "Weihrauch", geb: "Karawanserei", ek: "Diplomaten", vk: "", zutaten: [{n:"Fuhrwerke", a:0.1}, {n:"Pferde", a:0.1}, {n:"Trockenfleisch", a:0.5}, {n:"Schnaps", a:1}], sp: ["Kathedrale"] },
+      { name: "Wein", geb: "Brauerei", ek: "Klosterabt", vk: "Gasthaus", zutaten: [{n:"Wasser", a:5}, {n:"Trauben", a:20}, {n:"Fässer", a:0.1}], sp: ["Kathedrale", "Armenhaus"] },
+      { name: "Werkzeuge", geb: "Manufaktur", ek: "Handwerksmeister", vk: "", zutaten: [{n:"Eisen", a:0.1}, {n:"Holz", a:0.1}], sp: ["Höfischer Gemüsegarten", "Königliches Arsenal"] },
+      { name: "Wild", geb: "Viehzucht", ek: "Zuchtmeister", vk: "", zutaten: [{n:"Wasser", a:30}, {n:"Rüben", a:50}], sp: [] },
+      { name: "Wildbret", geb: "Schlachterei", ek: "Zuchtmeister", vk: "Viktualienmarkt", zutaten: [{n:"Wild", a:0.2}, {n:"Kräuter", a:0.5}], sp: ["Kathedrale", "Gemeindehaus"] },
+      { name: "Wolle", geb: "Viehzucht", ek: "Zuchtmeister", vk: "", zutaten: [{n:"Wasser", a:0.1}, {n:"Rüben", a:1}], sp: ["Stadtwache", "Armenhaus"] },
+      { name: "Ziegen", geb: "Viehzucht", ek: "Zuchtmeister", vk: "Bauernmarkt", zutaten: [{n:"Wasser", a:50}, {n:"Rüben", a:20}], sp: ["Gemeindehaus"] }
+    ];
 
-    <script>
-     const DATABASE = [
-  { name: "Äpfel", geb: "Obstpflückerei", ek: "Klosterabt", vk: "Obstmarkt", zutaten: [{n:"Wasser", a:10}], sp: ["Stadtwache", "Universität", "Armenhaus", "Kerker", "Höfischer Gemüsegarten"] },
-  { name: "Arkebusen", geb: "Waffenschmiede", ek: "Schmiedemeister", vk: "Waffenhändler", zutaten: [{n:"Eisen", a:2}, {n:"Salpeter", a:2}, {n:"Holz", a:2}], sp: ["Stadtwache", "Königliches Arsenal"] },
-  { name: "Bänke", geb: "Schreinerei", ek: "Handwerksmeister", vk: "", zutaten: [{n:"Holz", a:4}, {n:"Werkzeuge", a:1}, {n:"Eisen", a:0.1}, {n:"Leder", a:2}], sp: ["Kathedrale", "Universität", "Kerker", "Höfischer Gemüsegarten"] },
-  { name: "Beeren", geb: "Obstpflückerei", ek: "Klosterabt", vk: "Obstmarkt", zutaten: [{n:"Wasser", a:10}], sp: ["Spital", "Stadtwache", "Universität", "Höfischer Gemüsegarten"] },
-  { name: "Bibeln", geb: "Druckerei", ek: "Druckermeister", vk: "", zutaten: [{n:"Holz", a:5}, {n:"Wasser", a:2}, {n:"Werkzeuge", a:0.1}, {n:"Gold", a:0.1}, {n:"Leder", a:1}], sp: ["Kathedrale"] },
-  { name: "Bienenwachs", geb: "Bauernhof", ek: "Klosterabt", vk: "", zutaten: [{n:"Kräuter", a:5}], sp: [] },
-  { name: "Bier", geb: "Brauerei", ek: "Klosterabt", vk: "Gasthaus", zutaten: [{n:"Wasser", a:2}, {n:"Getreide", a:1}, {n:"Fässer", a:0.1}], sp: ["Stadtwache", "Armenhaus"] },
-  { name: "Birnen", geb: "Obstpflückerei", ek: "Klosterabt", vk: "Obstmarkt", zutaten: [{n:"Wasser", a:10}], sp: ["Gemeindehaus", "Höfischer Gemüsegarten"] },
-  { name: "Birnenschnaps", geb: "Brauerei", ek: "Müllermeister", vk: "Gasthaus", zutaten: [{n:"Birnen", a:10}, {n:"Wasser", a:10}, {n:"Holz", a:2}], sp: [] },
-  { name: "Boote", geb: "Manufaktur", ek: "Handwerksmeister", vk: "", zutaten: [{n:"Holz", a:4}, {n:"Pech", a:1}, {n:"Werkzeuge", a:2}], sp: ["Stadtwache", "Königliches Arsenal"] },
-  { name: "Brote", geb: "Bauernhof", ek: "Klosterabt", vk: "Bauernmarkt", zutaten: [{n:"Wasser", a:1}, {n:"Getreide", a:2}], sp: ["Spital", "Armenhaus", "Kerker"] },
-  { name: "Bücher", geb: "Druckerei", ek: "Druckermeister", vk: "", zutaten: [{n:"Holz", a:4}, {n:"Wasser", a:2}, {n:"Werkzeuge", a:0.1}], sp: ["Spital", "Universität", "Gemeindehaus"] },
-  { name: "Daunenbetten", geb: "Weberei", ek: "Schneidermeister", vk: "Tuchhändler", zutaten: [{n:"Gänse", a:20}, {n:"Werkzeuge", a:2}, {n:"Tuch", a:1}], sp: [] },
-  { name: "Eier", geb: "Viehzucht", ek: "Zuchtmeister", vk: "Bauernmarkt", zutaten: [{n:"Hühner", a:0.1}, {n:"Getreide", a:0.1}, {n:"Wasser", a:1}], sp: ["Kerker"] },
-  { name: "Eisen", geb: "Manufaktur", ek: "Handwerksmeister", vk: "", zutaten: [{n:"Eisenerz", a:2}, {n:"Kohle", a:1}], sp: ["Königliches Arsenal"] },
-  { name: "Eisenerz", geb: "Steinbruch", ek: "Steinmetzmeister", vk: "", zutaten: [{n:"Wasser", a:10}], sp: [] },
-  { name: "Fässer", geb: "Manufaktur", ek: "Handwerksmeister", vk: "Handwerkermarkt", zutaten: [{n:"Holz", a:0.5}, {n:"Eisen", a:0.1}, {n:"Werkzeuge", a:0.2}], sp: ["Höfischer Gemüsegarten", "Königliches Arsenal"] },
-  { name: "Fische", geb: "Fischerei", ek: "Zuchtmeister", vk: "Viktualienmarkt", zutaten: [{n:"Boote", a:0.05}, {n:"Netze", a:0.1}], sp: ["Armenhaus"] },
-  { name: "Flachs", geb: "Bauernhof", ek: "Klosterabt", vk: "", zutaten: [{n:"Wasser", a:10}], sp: ["Höfischer Gemüsegarten", "Königliches Arsenal"] },
-  { name: "Fuhrwerke", geb: "Manufaktur", ek: "Handwerksmeister", vk: "", zutaten: [{n:"Holz", a:2}, {n:"Eisen", a:0.5}, {n:"Werkzeuge", a:1}], sp: ["Stadtwache", "Gemeindehaus", "Höfischer Gemüsegarten", "Königliches Arsenal"] },
-  { name: "Gänse", geb: "Viehzucht", ek: "Zuchtmeister", vk: "Bauernmarkt", zutaten: [{n:"Wasser", a:15}, {n:"Getreide", a:4}], sp: [] },
-  { name: "Gänsebraten", geb: "Schlachterei", ek: "Zuchtmeister", vk: "Viktualienmarkt", zutaten: [{n:"Gänse", a:1}, {n:"Kräuter", a:0.3}, {n:"Äpfel", a:3}], sp: [] },
-  { name: "Getreide", geb: "Bauernhof", ek: "Klosterabt", vk: "Viktualienmarkt", zutaten: [{n:"Wasser", a:2}], sp: ["Höfischer Gemüsegarten"] },
-  { name: "Gewänder", geb: "Weberei", ek: "Schneidermeister", vk: "Tuchhändler", zutaten: [{n:"Wolle", a:10}, {n:"Seide", a:0.1}], sp: ["Kathedrale", "Gemeindehaus"] },
-  { name: "Gewürze", geb: "Karawanserei", ek: "Diplomaten", vk: "Viktualienmarkt", zutaten: [{n:"Fuhrwerke", a:0.1}, {n:"Pferde", a:0.1}, {n:"Trockenfleisch", a:0.5}, {n:"Kräuter", a:2}], sp: ["Kathedrale", "Armenhaus"] },
-  { name: "Gold", geb: "Steinbruch", ek: "Steinmetzmeister", vk: "", zutaten: [{n:"Werkzeuge", a:10}, {n:"Wasser", a:50}], sp: ["Kathedrale"] },
-  { name: "Goldgeschmeide", geb: "Goldschmiede", ek: "Schmiedemeister", vk: "Ablasshandel", zutaten: [{n:"Gold", a:5}, {n:"Werkzeuge", a:5}, {n:"Perlen", a:1}], sp: ["Kathedrale", "Gemeindehaus"] },
-  { name: "Heiligenstatuen", geb: "Goldschmiede", ek: "Schmiedemeister", vk: "Ablasshandel", zutaten: [{n:"Gold", a:1}, {n:"Silber", a:1}, {n:"Holz", a:2}, {n:"Werkzeuge", a:5}], sp: ["Kathedrale"] },
-  { name: "Hellebarden", geb: "Waffenschmiede", ek: "Schmiedemeister", vk: "Waffenhändler", zutaten: [{n:"Eisen", a:2}, {n:"Werkzeuge", a:2}, {n:"Holz", a:4}], sp: ["Kerker", "Königliches Arsenal"] },
-  { name: "Holz", geb: "Holzfäller", ek: "", vk: "", zutaten: [{n:"Wasser", a:20}], sp: [] },
-  { name: "Honig", geb: "Bauernhof", ek: "Klosterabt", vk: "Bauernmarkt", zutaten: [{n:"Kräuter", a:5}], sp: ["Kathedrale", "Gemeindehaus", "Armenhaus"] },
-  { name: "Hühner", geb: "Viehzucht", ek: "Zuchtmeister", vk: "Bauernmarkt", zutaten: [{n:"Wasser", a:20}, {n:"Getreide", a:5}], sp: ["Spital"] },
-  { name: "Käse", geb: "Bauernhof", ek: "Müllermeister", vk: "Bauernmarkt", zutaten: [{n:"Milch", a:1}, {n:"Wasser", a:1}, {n:"Salz", a:0.05}], sp: ["Kerker"] },
-  { name: "Kandierte Äpfel", geb: "Mühlenbäckerei", ek: "Müllermeister", vk: "Viktualienmarkt", zutaten: [{n:"Äpfel", a:1}, {n:"Sirup", a:1}], sp: ["Kerker"] },
-  { name: "Kerzen", geb: "Bauernhof", ek: "Klosterabt", vk: "Viktualienmarkt", zutaten: [{n:"Bienenwachs", a:0.2}, {n:"Werkzeuge", a:0.1}, {n:"Flachs", a:0.1}], sp: [] },
-  { name: "Kirschen", geb: "Obstpflückerei", ek: "Klosterabt", vk: "Obstmarkt", zutaten: [{n:"Wasser", a:10}], sp: ["Gemeindehaus", "Armenhaus", "Höfischer Gemüsegarten"] },
-  { name: "Kirschwasser", geb: "Brauerei", ek: "Müllermeister", vk: "Gasthaus", zutaten: [{n:"Kirschen", a:10}, {n:"Wasser", a:10}, {n:"Holz", a:2}], sp: ["Kerker"] },
-  { name: "Kleidung", geb: "Weberei", ek: "Schneidermeister", vk: "Tuchhändler", zutaten: [{n:"Wolle", a:7}, {n:"Flachs", a:10}], sp: ["Armenhaus"] },
-  { name: "Kohle", geb: "Holzfäller", ek: "Handwerksmeister", vk: "", zutaten: [{n:"Holz", a:2}], sp: [] },
-  { name: "Kräuter", geb: "Bauernhof", ek: "Klosterabt", vk: "Bauernmarkt", zutaten: [{n:"Wasser", a:5}], sp: ["Spital", "Kathedrale", "Gemeindehaus", "Höfischer Gemüsegarten"] },
-  { name: "Lampenöl", geb: "Fischerei", ek: "Zuchtmeister", vk: "Viktualienmarkt", zutaten: [{n:"Tran", a:0.1}, {n:"Kohle", a:0.1}], sp: [] },
-  { name: "Lebkuchen", geb: "Mühlenbäckerei", ek: "Müllermeister", vk: "Gasthaus", zutaten: [{n:"Mehl", a:2}, {n:"Gewürze", a:0.1}, {n:"Wasser", a:10}, {n:"Sirup", a:1}, {n:"Honig", a:0.1}], sp: ["Kerker"] },
-  { name: "Leder", geb: "Weberei", ek: "Schneidermeister", vk: "", zutaten: [{n:"Ziegen", a:1}, {n:"Holz", a:2}, {n:"Werkzeuge", a:0.2}], sp: ["Stadtwache", "Kathedrale", "Gemeindehaus", "Königliches Arsenal"] },
-  { name: "Lederwams", geb: "Waffenschmiede", ek: "Schmiedemeister", vk: "Waffenhändler", zutaten: [{n:"Leder", a:2}, {n:"Werkzeuge", a:2}, {n:"Tuch", a:1}, {n:"Wasser", a:10}], sp: ["Kerker", "Königliches Arsenal"] },
-  { name: "Mehl", geb: "Mühlenbäckerei", ek: "Müllermeister", vk: "", zutaten: [{n:"Getreide", a:1}, {n:"Steine", a:0.05}], sp: [] },
-  { name: "Met", geb: "Brauerei", ek: "Klosterabt", vk: "Gasthaus", zutaten: [{n:"Wasser", a:2}, {n:"Honig", a:2}, {n:"Fässer", a:0.1}], sp: ["Spital"] },
-  { name: "Milch", geb: "Viehzucht", ek: "Zuchtmeister", vk: "Bauernmarkt", zutaten: [{n:"Wasser", a:0.1}, {n:"Ziegen", a:0.1}, {n:"Rüben", a:0.1}], sp: ["Armenhaus"] },
-  { name: "Muschelketten", geb: "Goldschmiede", ek: "Schmiedemeister", vk: "Ablasshandel", zutaten: [{n:"Muscheln", a:10}, {n:"Gold", a:0.1}, {n:"Werkzeuge", a:1}], sp: [] },
-  { name: "Muscheln", geb: "Fischerei", ek: "Zuchtmeister", vk: "", zutaten: [{n:"Boote", a:0.1}, {n:"Werkzeuge", a:0.1}], sp: [] },
-  { name: "Netze", geb: "Weberei", ek: "Schneidermeister", vk: "", zutaten: [{n:"Flachs", a:5}, {n:"Werkzeuge", a:0.1}], sp: [] },
-  { name: "Nüsse", geb: "Obstpflückerei", ek: "Klosterabt", vk: "Obstmarkt", zutaten: [{n:"Wasser", a:10}], sp: ["Spital", "Universität", "Höfischer Gemüsegarten"] },
-  { name: "Pamphlete", geb: "Druckerei", ek: "Druckermeister", vk: "", zutaten: [{n:"Holz", a:2}, {n:"Wasser", a:1}, {n:"Werkzeuge", a:0.1}], sp: ["Kerker"] },
-  { name: "Pech", geb: "Holzfäller", ek: "Handwerksmeister", vk: "", zutaten: [{n:"Wasser", a:2}, {n:"Holz", a:5}], sp: [] },
-  { name: "Pergamente", geb: "Druckerei", ek: "Druckermeister", vk: "", zutaten: [{n:"Holz", a:1}, {n:"Wasser", a:0.5}, {n:"Werkzeuge", a:0.1}], sp: ["Universität", "Gemeindehaus"] },
-  { name: "Perlen", geb: "Fischerei", ek: "Zuchtmeister", vk: "", zutaten: [{n:"Boote", a:0.1}, {n:"Werkzeuge", a:0.2}], sp: [] },
-  { name: "Perlenketten", geb: "Goldschmiede", ek: "Schmiedemeister", vk: "Ablasshandel", zutaten: [{n:"Perlen", a:20}, {n:"Gold", a:0.1}, {n:"Werkzeuge", a:1}], sp: ["Kathedrale"] },
-  { name: "Pferde", geb: "Viehzucht", ek: "Zuchtmeister", vk: "", zutaten: [{n:"Wasser", a:200}, {n:"Rüben", a:300}], sp: ["Stadtwache", "Kathedrale"] },
-  { name: "Pökelfleisch", geb: "Schlachterei", ek: "Zuchtmeister", vk: "Viktualienmarkt", zutaten: [{n:"Schweine", a:0.2}, {n:"Salz", a:0.5}, {n:"Kräuter", a:0.5}, {n:"Gewürze", a:0.1}], sp: ["Spital", "Stadtwache", "Armenhaus"] },
-  { name: "Räucherfisch", geb: "Fischerei", ek: "Zuchtmeister", vk: "Bauernmarkt", zutaten: [{n:"Fische", a:1}, {n:"Kohle", a:0.5}, {n:"Kräuter", a:0.3}], sp: [] },
-  { name: "Regale", geb: "Schreinerei", ek: "Handwerksmeister", vk: "Handwerkermarkt", zutaten: [{n:"Holz", a:3}, {n:"Werkzeuge", a:1}, {n:"Eisen", a:0.1}], sp: ["Spital", "Universität", "Gemeindehaus", "Höfischer Gemüsegarten"] },
-  { name: "Rüben", geb: "Bauernhof", ek: "Klosterabt", vk: "", zutaten: [{n:"Wasser", a:1}], sp: ["Höfischer Gemüsegarten"] },
-  { name: "Rüstungen", geb: "Waffenschmiede", ek: "Schmiedemeister", vk: "Waffenhändler", zutaten: [{n:"Eisen", a:5}, {n:"Werkzeuge", a:5}, {n:"Gold", a:1}], sp: ["Stadtwache", "Königliches Arsenal"] },
-  { name: "Salpeter", geb: "Steinbruch", ek: "Steinmetzmeister", vk: "", zutaten: [{n:"Werkzeuge", a:5}, {n:"Wasser", a:5}, {n:"Holz", a:5}], sp: ["Stadtwache"] },
-  { name: "Salz", geb: "Karawanserei", ek: "Diplomaten", vk: "Viktualienmarkt", zutaten: [{n:"Fuhrwerke", a:0.1}, {n:"Pferde", a:0.1}, {n:"Brote", a:5}, {n:"Teppiche", a:0.5}], sp: ["Spital"] },
-  { name: "Schilde", geb: "Waffenschmiede", ek: "Schmiedemeister", vk: "Waffenhändler", zutaten: [{n:"Holz", a:3}, {n:"Eisen", a:1}, {n:"Kohle", a:1}, {n:"Werkzeuge", a:2}], sp: ["Kerker", "Königliches Arsenal"] },
-  { name: "Schlachtrösser", geb: "Waffenschmiede", ek: "Schmiedemeister", vk: "Waffenhändler", zutaten: [{n:"Pferde", a:1}, {n:"Eisen", a:5}, {n:"Leder", a:5}], sp: ["Königliches Arsenal"] },
-  { name: "Schnaps", geb: "Brauerei", ek: "Klosterabt", vk: "Gasthaus", zutaten: [{n:"Wasser", a:10}, {n:"Kräuter", a:5}, {n:"Fässer", a:0.1}], sp: ["Spital", "Stadtwache", "Armenhaus"] },
-  { name: "Schränke", geb: "Schreinerei", ek: "Handwerksmeister", vk: "Handwerkermarkt", zutaten: [{n:"Holz", a:10}, {n:"Werkzeuge", a:2}, {n:"Eisen", a:0.2}], sp: ["Gemeindehaus", "Armenhaus"] },
-  { name: "Schreibfedern", geb: "Druckerei", ek: "Handwerksmeister", vk: "Handwerkermarkt", zutaten: [{n:"Gänse", a:0.1}, {n:"Werkzeuge", a:0.1}], sp: [] },
-  { name: "Schuhe", geb: "Weberei", ek: "Schneidermeister", vk: "Tuchhändler", zutaten: [{n:"Leder", a:0.2}, {n:"Holz", a:0.1}, {n:"Werkzeuge", a:0.1}], sp: ["Armenhaus"] },
-  { name: "Schweine", geb: "Viehzucht", ek: "Zuchtmeister", vk: "Bauernmarkt", zutaten: [{n:"Wasser", a:30}, {n:"Rüben", a:40}], sp: [] },
-  { name: "Schwerter", geb: "Waffenschmiede", ek: "Schmiedemeister", vk: "Waffenhändler", zutaten: [{n:"Eisen", a:3}, {n:"Werkzeuge", a:3}, {n:"Silber", a:1}], sp: ["Stadtwache", "Kerker", "Königliches Arsenal"] },
-  { name: "Seide", geb: "Karawanserei", ek: "Diplomaten", vk: "Tuchhändler", zutaten: [{n:"Fuhrwerke", a:0.1}, {n:"Pferde", a:0.1}, {n:"Trockenfleisch", a:0.5}, {n:"Honig", a:1}], sp: [] },
-  { name: "Silber", geb: "Steinbruch", ek: "Steinmetzmeister", vk: "", zutaten: [{n:"Werkzeuge", a:7}, {n:"Wasser", a:30}], sp: ["Königliches Arsenal"] },
-  { name: "Silbergeschmeide", geb: "Goldschmiede", ek: "Schmiedemeister", vk: "Waffenhändler", zutaten: [{n:"Silber", a:5}, {n:"Werkzeuge", a:5}], sp: ["Stadtwache"] },
-  { name: "Sirup", geb: "Mühlenbäckerei", ek: "Müllermeister", vk: "", zutaten: [{n:"Rüben", a:2}, {n:"Wasser", a:2}], sp: [] },
-  { name: "Steine", geb: "Steinbruch", ek: "", vk: "", zutaten: [{n:"Werkzeuge", a:0.5}, {n:"Wasser", a:0.5}], sp: ["Königliches Arsenal"] },
-  { name: "Stühle", geb: "Schreinerei", ek: "Handwerksmeister", vk: "Handwerkermarkt", zutaten: [{n:"Holz", a:3}, {n:"Werkzeuge", a:1}, {n:"Eisen", a:0.1}], sp: ["Kerker"] },
-  { name: "Süßes Brot", geb: "Mühlenbäckerei", ek: "Müllermeister", vk: "Gasthaus", zutaten: [{n:"Mehl", a:3}, {n:"Milch", a:2}, {n:"Honig", a:1}, {n:"Sirup", a:1}, {n:"Trauben", a:1}], sp: ["Kerker"] },
-  { name: "Teppiche", geb: "Weberei", ek: "Schneidermeister", vk: "Tuchhändler", zutaten: [{n:"Wolle", a:30}, {n:"Werkzeuge", a:2}], sp: ["Kathedrale", "Gemeindehaus"] },
-  { name: "Tische", geb: "Schreinerei", ek: "Handwerksmeister", vk: "Handwerkermarkt", zutaten: [{n:"Holz", a:5}, {n:"Werkzeuge", a:1}, {n:"Eisen", a:0.1}], sp: ["Spital", "Universität", "Gemeindehaus"] },
-  { name: "Tran", geb: "Fischerei", ek: "Zuchtmeister", vk: "", zutaten: [{n:"Fische", a:0.1}, {n:"Wasser", a:5}], sp: ["Spital"] },
-  { name: "Trauben", geb: "Obstpflückerei", ek: "Klosterabt", vk: "Obstmarkt", zutaten: [{n:"Wasser", a:10}], sp: ["Höfischer Gemüsegarten"] },
-  { name: "Trockenfleisch", geb: "Schlachterei", ek: "Zuchtmeister", vk: "Viktualienmarkt", zutaten: [{n:"Schweine", a:0.2}, {n:"Kräuter", a:0.5}], sp: ["Spital", "Stadtwache", "Armenhaus"] },
-  { name: "Tuch", geb: "Weberei", ek: "Schneidermeister", vk: "Tuchhändler", zutaten: [{n:"Wolle", a:7}, {n:"Werkzeuge", a:0.1}], sp: ["Spital"] },
-  { name: "Wasser", geb: "Quellbrunnen", ek: "", vk: "", zutaten: [], sp: ["Kerker", "Höfischer Gemüsegarten"] },
-  { name: "Weihrauch", geb: "Karawanserei", ek: "Diplomaten", vk: "", zutaten: [{n:"Fuhrwerke", a:0.1}, {n:"Pferde", a:0.1}, {n:"Trockenfleisch", a:0.5}, {n:"Schnaps", a:1}], sp: ["Kathedrale"] },
-  { name: "Wein", geb: "Brauerei", ek: "Klosterabt", vk: "Gasthaus", zutaten: [{n:"Wasser", a:5}, {n:"Trauben", a:20}, {n:"Fässer", a:0.1}], sp: ["Kathedrale", "Armenhaus"] },
-  { name: "Werkzeuge", geb: "Manufaktur", ek: "Handwerksmeister", vk: "", zutaten: [{n:"Eisen", a:0.1}, {n:"Holz", a:0.1}], sp: ["Höfischer Gemüsegarten", "Königliches Arsenal"] },
-  { name: "Wild", geb: "Viehzucht", ek: "Zuchtmeister", vk: "", zutaten: [{n:"Wasser", a:30}, {n:"Rüben", a:50}], sp: [] },
-  { name: "Wildbret", geb: "Schlachterei", ek: "Zuchtmeister", vk: "Viktualienmarkt", zutaten: [{n:"Wild", a:0.2}, {n:"Kräuter", a:0.5}], sp: ["Kathedrale", "Gemeindehaus"] },
-  { name: "Wolle", geb: "Viehzucht", ek: "Zuchtmeister", vk: "", zutaten: [{n:"Wasser", a:0.1}, {n:"Rüben", a:1}], sp: ["Stadtwache", "Armenhaus"] },
-  { name: "Ziegen", geb: "Viehzucht", ek: "Zuchtmeister", vk: "Bauernmarkt", zutaten: [{n:"Wasser", a:50}, {n:"Rüben", a:20}], sp: ["Gemeindehaus"] }
-];
+    // Map für schnellen Zugriff
+    let dbMap = new Map();
 
+    function buildDatabaseMap() {
+      dbMap.clear();
+      DATABASE.forEach(item => {
+        dbMap.set(item.name, item);
+      });
+    }
 
-        let currentActive = null;
+    // ==========================================
+    // 2. LOGIK UND BERECHNUNGEN
+    // ==========================================
 
-        const prodList = [...new Set(database.map(i => i.geb).filter(Boolean))].sort();
-        const forschList = [...new Set(database.map(i => i.ek).filter(Boolean))].sort();
-        const verkList = [...new Set(database.map(i => i.vk).filter(Boolean))].sort();
-        const spezList = [...new Set(database.flatMap(i => i.sp).filter(Boolean))].sort();
-        const itemsList = database.map(i => i.name).sort();
+    function getItem(name) {
+      return dbMap.get(name) || { name: name, geb: "Unbekannt", zutaten: [] };
+    }
 
-        function buildGrid(containerId, list, type) {
-            const container = document.getElementById(containerId);
-            if (!container) return;
-            
-            let sortedList = list;
+    function calculateTotalRequirements(itemName, amount, totals = {}) {
+      const item = getItem(itemName);
+      if (!item) return totals;
 
-            // Für Produkte: Umsortierung von A-Z in Spaltenform (6 Spalten)
-            if (type === 'item') {
-                const total = list.length;
-                const cols = 6;
-                const rows = Math.ceil(total / cols); // 16 Zeilen
-                sortedList = [];
-                for (let r = 0; r < rows; r++) {
-                    for (let c = 0; c < cols; c++) {
-                        const index = c * rows + r;
-                        if (index < total) {
-                            sortedList.push(list[index]);
-                        }
-                    }
-                }
-            }
+      if (!totals[itemName]) {
+        totals[itemName] = { amount: 0, geb: item.geb };
+      }
+      totals[itemName].amount += amount;
 
-            sortedList.forEach(name => {
-                const div = document.createElement('div');
-                div.className = 'cell';
-                div.textContent = name;
-                div.dataset.name = name;
-                div.dataset.type = type;
-                
-                div.addEventListener('click', () => toggleSelection(name, type));
-                container.appendChild(div);
-            });
+      if (item.zutaten && item.zutaten.length > 0) {
+        item.zutaten.forEach(z => {
+          calculateTotalRequirements(z.n, z.a * amount, totals);
+        });
+      }
+
+      return totals;
+    }
+
+    function buildTreeHTML(itemName, amount) {
+      const item = getItem(itemName);
+      
+      let html = `<li class="tree-item">`;
+      html += `
+        <div class="node-card">
+          <div class="node-title">${item.name} (${formatNumber(amount)})</div>
+          <div class="node-details">
+            Gebäude: ${item.geb || '-'}<br>
+            ${item.ek ? 'Einkauf: ' + item.ek + '<br>' : ''}
+            ${item.vk ? 'Verkauf: ' + item.vk + '<br>' : ''}
+            ${item.sp && item.sp.length > 0 ? 'Spende: ' + item.sp.join(', ') : ''}
+          </div>
+        </div>
+      `;
+
+      if (item.zutaten && item.zutaten.length > 0) {
+        html += `<ul>`;
+        item.zutaten.forEach(z => {
+          html += buildTreeHTML(z.n, z.a * amount);
+        });
+        html += `</ul>`;
+      }
+
+      html += `</li>`;
+      return html;
+    }
+
+    function formatNumber(num) {
+      return Number.isInteger(num) ? num : parseFloat(num.toFixed(4));
+    }
+
+    // ==========================================
+    // 3. UI RENDER & EVENT HANDLER
+    // ==========================================
+
+    const itemSelect = document.getElementById('itemSelect');
+    const searchInput = document.getElementById('search');
+    const quantityInput = document.getElementById('quantity');
+    const detailsHeader = document.getElementById('detailsHeader');
+    const summaryTableBody = document.querySelector('#summaryTable tbody');
+    const treeContainer = document.getElementById('treeContainer');
+
+    function renderSelectOptions(filterText = '') {
+      itemSelect.innerHTML = '';
+      const filter = filterText.toLowerCase();
+
+      const sortedItems = [...DATABASE].sort((a, b) => a.name.localeCompare(b.name));
+
+      sortedItems.forEach(item => {
+        const matchesName = item.name.toLowerCase().includes(filter);
+        const matchesGeb = item.geb && item.geb.toLowerCase().includes(filter);
+        const matchesVk = item.vk && item.vk.toLowerCase().includes(filter);
+        const matchesEk = item.ek && item.ek.toLowerCase().includes(filter);
+        const matchesSp = item.sp && item.sp.some(s => s.toLowerCase().includes(filter));
+
+        if (matchesName || matchesGeb || matchesVk || matchesEk || matchesSp) {
+          const option = document.createElement('option');
+          option.value = item.name;
+          option.textContent = `${item.name} (${item.geb})`;
+          itemSelect.appendChild(option);
         }
+      });
+    }
 
-        buildGrid('container-prod', prodList, 'geb');
-        buildGrid('container-forsch', forschList, 'ek');
-        buildGrid('container-verk', verkList, 'vk');
-        buildGrid('container-spez', spezList, 'sp');
-        buildGrid('container-items', itemsList, 'item');
+    function updateCalculation() {
+      const selectedName = itemSelect.value;
+      const quantity = parseFloat(quantityInput.value) || 1;
 
-        function toggleSelection(name, type) {
-            if (currentActive && currentActive.name === name && currentActive.type === type) {
-                clearAll();
-                return;
-            }
+      if (!selectedName) {
+        detailsHeader.innerHTML = '<h2>Bitte wähle eine Ware aus</h2>';
+        summaryTableBody.innerHTML = '<tr><td colspan="3">Keine Auswahl</td></tr>';
+        treeContainer.innerHTML = '';
+        return;
+      }
 
-            clearAll();
-            currentActive = { name, type };
+      const item = getItem(selectedName);
 
-            if (type === 'item') {
-                const item = database.find(i => i.name === name);
-                if (!item) return;
+      // Header-Details
+      detailsHeader.innerHTML = `
+        <h2>${item.name}</h2>
+        <p>
+          <strong>Gebäude:</strong> ${item.geb || '-'} | 
+          <strong>Einkauf:</strong> ${item.ek || '-'} | 
+          <strong>Verkauf:</strong> ${item.vk || '-'}
+          ${item.sp && item.sp.length > 0 ? `<br><strong>Spende bei:</strong> ${item.sp.join(', ')}` : ''}
+        </p>
+      `;
 
-                highlightCell('item', name, 'highlight-blue selected-target', name);
-                
-                // Rot: Vorprodukte (Zutaten für dieses Produkt)
-                item.zutaten.forEach(z => {
-                    highlightCell('item', z.n, 'highlight-red', `${z.n} (x${z.a})`);
-                });
+      // 1. Gesamte Rohstoffe berechnen
+      const totals = calculateTotalRequirements(selectedName, quantity);
+      summaryTableBody.innerHTML = '';
+      
+      Object.keys(totals).sort().forEach(name => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td><strong>${name}</strong></td>
+          <td>${formatNumber(totals[name].amount)}</td>
+          <td>${totals[name].geb}</td>
+        `;
+        summaryTableBody.appendChild(row);
+      });
 
-                // Blau: Folgeprodukte (Wo wird dieses Produkt als Zutat benötigt?)
-                const folgeProdukte = database.filter(i => i.zutaten.some(z => z.n === name));
-                folgeProdukte.forEach(i => {
-                    const zut = i.zutaten.find(z => z.n === name);
-                    highlightCell('item', i.name, 'highlight-blue', `${i.name} (x${zut.a})`);
-                });
+      // 2. Produktionsbaum rendern
+      treeContainer.innerHTML = `<ul class="tree">${buildTreeHTML(selectedName, quantity)}</ul>`;
+    }
 
-                // Grün: Gebäude
-                if (item.geb) highlightCell('geb', item.geb, 'highlight-green');
-                if (item.ek) highlightCell('ek', item.ek, 'highlight-green');
-                if (item.vk) highlightCell('vk', item.vk, 'highlight-green');
-                item.sp.forEach(s => highlightCell('sp', s, 'highlight-green'));
+    // Events
+    searchInput.addEventListener('input', (e) => {
+      renderSelectOptions(e.target.value);
+    });
 
-                // BOM Box aktualisieren
-                renderBomBox(item, folgeProdukte);
+    itemSelect.addEventListener('change', updateCalculation);
+    quantityInput.addEventListener('input', updateCalculation);
 
-            } else {
-                highlightCell(type, name, 'highlight-green selected-target');
+    // ==========================================
+    // 4. EXPORT & IMPORT FUNKTIONEN
+    // ==========================================
 
-                database.forEach(i => {
-                    let match = false;
-                    if (type === 'geb' && i.geb === name) match = true;
-                    if (type === 'ek' && i.ek === name) match = true;
-                    if (type === 'vk' && i.vk === name) match = true;
-                    if (type === 'sp' && i.sp.includes(name)) match = true;
+    document.getElementById('exportBtn').addEventListener('click', () => {
+      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(DATABASE, null, 2));
+      const downloadAnchor = document.createElement('a');
+      downloadAnchor.setAttribute("href", dataStr);
+      downloadAnchor.setAttribute("download", "kapi_bom_database.json");
+      document.body.appendChild(downloadAnchor);
+      downloadAnchor.click();
+      downloadAnchor.remove();
+    });
 
-                    if (match) highlightCell('item', i.name, 'highlight-green');
-                });
+    document.getElementById('fileInput').addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
 
-                document.getElementById('bom-box').innerHTML = `<i>Gebäude/Ort <b>${name}</b> ausgewählt. Zugehörige Produkte sind grün hervorgehoben.</i>`;
-            }
+      const reader = new FileReader();
+      reader.onload = function(evt) {
+        try {
+          const importedData = JSON.parse(evt.target.result);
+          if (Array.isArray(importedData)) {
+            DATABASE = importedData;
+            buildDatabaseMap();
+            renderSelectOptions();
+            alert('Datenbank erfolgreich importiert!');
+          } else {
+            alert('Ungültiges Format: Das JSON muss ein Array von Waren sein.');
+          }
+        } catch (err) {
+          alert('Fehler beim Lesen der JSON-Datei: ' + err.message);
         }
+      };
+      reader.readAsText(file);
+    });
 
-        function highlightCell(type, name, className, label = null) {
-            const cells = document.querySelectorAll(`.cell[data-type="${type}"][data-name="${name}"]`);
-            cells.forEach(c => {
-                className.split(' ').forEach(cls => c.classList.add(cls));
-                if (label) c.textContent = label;
-            });
-        }
-
-        function renderBomBox(item, folgeProdukte) {
-            const box = document.getElementById('bom-box');
-            
-            let zutatenHtml = item.zutaten.length > 0 
-                ? item.zutaten.map(z => `<li><b>${z.a}x</b> ${z.n}</li>`).join('') 
-                : '<li><i>Keine Vorprodukte (Rohstoff)</i></li>';
-
-            let folgeHtml = folgeProdukte.length > 0 
-                ? folgeProdukte.map(f => {
-                    const z = f.zutaten.find(zut => zut.n === item.name);
-                    return `<li><b>${f.name}</b> (benötigt ${z.a}x ${item.name})</li>`;
-                  }).join('') 
-                : '<li><i>Wird für kein weiteres Produkt direkt benötigt</i></li>';
-
-            const spText = item.sp.length > 0 ? item.sp.join(', ') : 'Keine';
-
-            box.innerHTML = `
-                <h3>Rezeptur für 1x ${item.name}</h3>
-                <p style="margin: 3px 0 8px 0; font-size:12px; line-height: 1.5;">
-                    <b>Herstellung:</b> ${item.geb || 'Keine'} | 
-                    <b>Forschung:</b> ${item.ek || 'Keine'} | 
-                    <b>Verkauf:</b> ${item.vk || 'Keine'}<br>
-                    <b>Spezialgebäude / Lieferorte:</b> ${spText}
-                </p>
-                <b>Benötigte Zutaten (Vorprodukte):</b>
-                <ul class="bom-list" style="color: var(--color-red);">${zutatenHtml}</ul>
-                <br>
-                <b>Wird verwendet in (Folgeprodukte):</b>
-                <ul class="bom-list" style="color: var(--color-blue);">${folgeHtml}</ul>
-            `;
-        }
-
-        function clearAll() {
-            currentActive = null;
-            document.querySelectorAll('.cell').forEach(c => {
-                c.className = 'cell';
-                c.textContent = c.dataset.name;
-            });
-            document.getElementById('bom-box').innerHTML = '<i>Klicke auf ein Produkt, um dessen Stückliste und Rezeptur anzuzeigen.</i>';
-        }
-    </script>
+    // ==========================================
+    // INITIALISIERUNG
+    // ==========================================
+    buildDatabaseMap();
+    renderSelectOptions();
+  </script>
 </body>
 </html>
