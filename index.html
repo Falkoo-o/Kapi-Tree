@@ -167,7 +167,7 @@
         Aufrufe gesamt: <span id="visits-total">...</span> &nbsp;|&nbsp; Diesen Monat: <span id="visits-month">...</span>
     </div>
 
-    <script>
+     <script>
         const database = [
   { name: "Äpfel", geb: "Obstpflückerei", ek: "Klosterabt", vk: "Obstmarkt", zutaten: [{n:"Wasser", a:10}], sp: ["Stadtwache", "Universität", "Armenhaus", "Kerker", "Höfischer Gemüsegarten"] },
   { name: "Arkebusen", geb: "Waffenschmiede", ek: "Schmiedemeister", vk: "Waffenhändler", zutaten: [{n:"Eisen", a:2}, {n:"Salpeter", a:2}, {n:"Holz", a:2}], sp: ["Stadtwache", "Königliches Arsenal"] },
@@ -278,11 +278,10 @@
             
             let sortedList = list;
 
-            // Für Produkte: Umsortierung von A-Z in Spaltenform (6 Spalten)
             if (type === 'item') {
                 const total = list.length;
                 const cols = 6;
-                const rows = Math.ceil(total / cols); // 16 Zeilen
+                const rows = Math.ceil(total / cols);
                 sortedList = [];
                 for (let r = 0; r < rows; r++) {
                     for (let c = 0; c < cols; c++) {
@@ -327,25 +326,21 @@
 
                 highlightCell('item', name, 'highlight-blue selected-target', name);
                 
-                // Rot: Vorprodukte (Zutaten für dieses Produkt)
                 item.zutaten.forEach(z => {
                     highlightCell('item', z.n, 'highlight-red', `${z.n} (x${z.a})`);
                 });
 
-                // Blau: Folgeprodukte (Wo wird dieses Produkt als Zutat benötigt?)
                 const folgeProdukte = database.filter(i => i.zutaten.some(z => z.n === name));
                 folgeProdukte.forEach(i => {
                     const zut = i.zutaten.find(z => z.n === name);
                     highlightCell('item', i.name, 'highlight-blue', `${i.name} (x${zut.a})`);
                 });
 
-                // Grün: Gebäude
                 if (item.geb) highlightCell('geb', item.geb, 'highlight-green');
                 if (item.ek) highlightCell('ek', item.ek, 'highlight-green');
                 if (item.vk) highlightCell('vk', item.vk, 'highlight-green');
                 item.sp.forEach(s => highlightCell('sp', s, 'highlight-green'));
 
-                // BOM Box aktualisieren
                 renderBomBox(item, folgeProdukte);
 
             } else {
@@ -414,29 +409,36 @@
             document.getElementById('bom-box').innerHTML = '<i>Klicke auf ein Produkt, um dessen Stückliste und Rezeptur anzuzeigen.</i>';
         }
 
-        // --- BESUCHERZÄHLER SKRIPT (CountAPI) ---
+        // --- BESUCHERZÄHLER SKRIPT (Aktualisierte API) ---
         (function initCounter() {
-            const pageId = "kapi-regnum-techtree"; // ID für dein Projekt
+            // Eindeutige ID für dein Projekt (z.B. mit Suffix zur Vermeidung von Kollisionen)
+            const appId = "kapi-regnum-techtree-v1-9f2d"; 
 
-            // Aktueller Monat als YYYY-MM
             const now = new Date();
             const currentMonth = now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0');
 
+            const keyTotal = `${appId}-total`;
+            const keyMonth = `${appId}-${currentMonth}`;
+
             // 1. Gesamtzähler
-            fetch(`https://api.countapi.xyz/hit/${pageId}/total`)
+            fetch(`https://countapi.mileshilliard.com/api/v1/hit/${keyTotal}`)
                 .then(res => res.json())
                 .then(data => {
-                    document.getElementById('visits-total').innerText = data.value;
+                    if (data && typeof data.value !== 'undefined') {
+                        document.getElementById('visits-total').innerText = data.value;
+                    }
                 })
                 .catch(() => {
                     document.getElementById('visits-total').innerText = '?';
                 });
 
-            // 2. Monatszähler (wechselt jeden Monat automatisch)
-            fetch(`https://api.countapi.xyz/hit/${pageId}/${currentMonth}`)
+            // 2. Monatszähler
+            fetch(`https://countapi.mileshilliard.com/api/v1/hit/${keyMonth}`)
                 .then(res => res.json())
                 .then(data => {
-                    document.getElementById('visits-month').innerText = data.value;
+                    if (data && typeof data.value !== 'undefined') {
+                        document.getElementById('visits-month').innerText = data.value;
+                    }
                 })
                 .catch(() => {
                     document.getElementById('visits-month').innerText = '?';
