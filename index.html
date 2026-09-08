@@ -119,6 +119,16 @@
         .legend .green { color: var(--color-green); font-weight: bold; }
         .legend .red { color: var(--color-red); font-weight: bold; }
         .legend .blue { color: var(--color-blue); font-weight: bold; }
+
+        /* Unauffälliger Zähler-Bereich am Fuß der Seite */
+        .visitor-counter {
+            margin-top: 15px;
+            padding-top: 8px;
+            border-top: 1px solid #dcd7a0;
+            font-size: 11px;
+            color: #6a6332;
+            text-align: center;
+        }
     </style>
 </head>
 <body>
@@ -150,6 +160,11 @@
         <span class="green">Grün</span> leuchten die jeweiligen Gebäude auf, in denen man das angemerkte Produkt produzieren, erforschen, verkaufen oder an die man es liefern kann (bzw. bei Tippen auf ein Gebäude alle zugehörigen Produkte).<br>
         <span class="red">Rot</span> leuchten die Produkte auf, die man benötigt, um das angetippte Produkt herzustellen (inkl. benötigter Menge).<br>
         <span class="blue">Blau</span> leuchten die Produkte auf, die man aus dem angetippten Produkt erstellen kann (inkl. Verbrauchsmenge im Folgeprodukt).
+    </div>
+
+    <!-- Besucherzähler Anzeige -->
+    <div class="visitor-counter">
+        Aufrufe gesamt: <span id="visits-total">...</span> &nbsp;|&nbsp; Diesen Monat: <span id="visits-month">...</span>
     </div>
 
     <script>
@@ -398,6 +413,35 @@
             });
             document.getElementById('bom-box').innerHTML = '<i>Klicke auf ein Produkt, um dessen Stückliste und Rezeptur anzuzeigen.</i>';
         }
+
+        // --- BESUCHERZÄHLER SKRIPT (CountAPI) ---
+        (function initCounter() {
+            const pageId = "kapi-regnum-techtree"; // ID für dein Projekt
+
+            // Aktueller Monat als YYYY-MM
+            const now = new Date();
+            const currentMonth = now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0');
+
+            // 1. Gesamtzähler
+            fetch(`https://api.countapi.xyz/hit/${pageId}/total`)
+                .then(res => res.json())
+                .then(data => {
+                    document.getElementById('visits-total').innerText = data.value;
+                })
+                .catch(() => {
+                    document.getElementById('visits-total').innerText = '?';
+                });
+
+            // 2. Monatszähler (wechselt jeden Monat automatisch)
+            fetch(`https://api.countapi.xyz/hit/${pageId}/${currentMonth}`)
+                .then(res => res.json())
+                .then(data => {
+                    document.getElementById('visits-month').innerText = data.value;
+                })
+                .catch(() => {
+                    document.getElementById('visits-month').innerText = '?';
+                });
+        })();
     </script>
 </body>
 </html>
